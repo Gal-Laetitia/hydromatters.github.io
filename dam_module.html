@@ -1,0 +1,1633 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Schéma Scientifique de Module Réservoir</title>
+    <!-- Tailwind CSS pour un design moderne et responsive -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- KaTeX pour le rendu des équations mathématiques de qualité LaTeX -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/contrib/auto-render.min.js" onload="renderMathInElement(document.body);"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,700;1,400&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap');
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+        }
+        .serif-font {
+            font-family: 'Lora', Georgia, serif;
+        }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col">
+
+    <!-- Header -->
+    <header class="bg-slate-900 text-white py-5 px-6 shadow-md border-b border-slate-700">
+        <div class="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-4">
+            <div>
+                <span id="badge-comp-type" class="bg-blue-500 text-xs font-semibold px-2.5 py-1 rounded text-white uppercase tracking-wider">Composante Hydrologique</span>
+                <h1 id="header-title" class="text-2xl md:text-3xl font-bold tracking-tight mt-1">Module de Réservoir</h1>
+                <p id="header-desc" class="text-slate-400 text-sm mt-1">Intégration dans le modèle Hydrologique MGB-IPH pour la représentation des réservoir naturels et des barrages.</p>
+            </div>
+            <div class="flex flex-wrap gap-2">
+                <button id="btn-theme" onclick="toggleTheme()" class="bg-slate-800 hover:bg-slate-700 text-sm font-medium px-4 py-2 rounded-lg border border-slate-600 transition flex items-center gap-2">
+                    <span id="theme-icon">🎨</span> <span id="lbl-theme-prefix">Mode :</span> <span id="theme-text">Couleur</span>
+                </button>
+                <button id="btn-lang" onclick="toggleLanguage()" class="bg-slate-800 hover:bg-slate-700 text-sm font-medium px-4 py-2 rounded-lg border border-slate-600 transition flex items-center gap-2">
+                    🌐 <span id="lbl-lang-prefix">Langue :</span> <span id="lang-text">Français</span>
+                </button>
+                <button id="btn-export" onclick="exportSVG()" class="bg-blue-600 hover:bg-blue-500 text-sm font-semibold px-4 py-2 rounded-lg transition text-white flex items-center gap-2 shadow-sm">
+                    💾 <span id="lbl-export-text">Télécharger le SVG (.svg)</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="flex-1 max-w-7xl w-full mx-auto px-4 py-6 grid grid-cols-1 lg:grid-cols-12 gap-6">
+        
+        <!-- Left: Interactive Schematic Area -->
+        <section class="lg:col-span-7 bg-white rounded-xl shadow-sm border border-slate-200 p-4 flex flex-col justify-between">
+            <div class="border-b border-slate-100 pb-3 mb-4 flex justify-between items-center">
+                <h2 class="font-bold text-slate-800 flex items-center gap-2">
+                    <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                    <span id="canvas-title">Modèle conceptuel vectoriel (Interactif)</span>
+                </h2>
+                <span id="canvas-subtitle" class="text-xs text-slate-500 bg-slate-100 px-2 py-1 rounded">Cliquez sur un composant pour voir son équation</span>
+            </div>
+
+            <!-- Interactivity Slider & Date controls -->
+            <div class="bg-slate-50 p-3 rounded-lg border border-slate-200/60 mb-4 flex flex-col gap-3">
+                <div class="flex flex-col sm:flex-row gap-4 items-center justify-between text-sm">
+                    <div class="w-full sm:w-2/3">
+                        <label id="label-height" for="height-slider" class="block font-semibold text-slate-700 mb-1 flex justify-between">
+                            <span>Hauteur d'eau active ($h$) :</span>
+                            <span id="slider-val" class="text-blue-600 font-bold">15.0 m</span>
+                        </label>
+                        <input type="range" id="height-slider" min="1" max="24" step="0.1" value="15" oninput="updateWaterLevel(this.value)" class="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-blue-600">
+                    </div>
+                    <div class="grid grid-cols-2 gap-2 text-xs w-full sm:w-1/3">
+                        <div class="bg-white p-1.5 rounded border border-slate-100">
+                            <span id="label-surface" class="block text-slate-400">Surface ($A$)</span>
+                            <span id="calc-area" class="font-bold text-slate-700">125.0 ha</span>
+                        </div>
+                        <div class="bg-white p-1.5 rounded border border-slate-100">
+                            <span id="label-volume" class="block text-slate-400">Volume ($V$)</span>
+                            <span id="calc-volume" class="font-bold text-slate-700">18.75 hm³</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Fortran Calendar Sim controls (Day removed as requested) -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2 border-t border-slate-200/50 text-xs">
+                    <div>
+                        <label id="lbl-sim-month" class="block text-slate-500 font-medium mb-1">Mois de simul. (IMES) :</label>
+                        <select id="sim-month" onchange="updateCalendar()" class="w-full bg-white border border-slate-200 p-1.5 rounded font-medium text-slate-700">
+                            <option value="1">Janvier (1)</option>
+                            <option value="2">Février (2)</option>
+                            <option value="3">Mars (3)</option>
+                            <option value="4">Avril (4)</option>
+                            <option value="5" selected>Mai (5)</option>
+                            <option value="6">Juin (6)</option>
+                            <option value="7">Juillet (7)</option>
+                            <option value="8">Août (8)</option>
+                            <option value="9">Septembre (9)</option>
+                            <option value="10">Octobre (10)</option>
+                            <option value="11">Novembre (11)</option>
+                            <option value="12">Décembre (12)</option>
+                        </select>
+                    </div>
+                    <div class="bg-blue-50/50 border border-blue-100 rounded p-1.5 flex flex-col justify-center">
+                        <span id="lbl-sched-open" class="text-[10px] text-blue-600 font-semibold uppercase tracking-wider">Consigne mensuelle (frac_cur)</span>
+                        <span id="val-sched-open" class="text-sm font-bold text-blue-900 font-mono">40.0 %</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Hydrological Regime Selector & Live Flow Simulator -->
+            <div class="bg-slate-900 text-slate-100 p-4 rounded-lg border border-slate-800 mb-4 text-xs">
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 border-b border-slate-800 pb-3 mb-3">
+                    <div>
+                        <span id="scenario-badge" class="text-[10px] uppercase font-bold text-blue-400 tracking-wider">Scénario de Décharge</span>
+                        <h4 class="font-bold text-white text-sm" id="regime-title">Configuration de l'Exutoire</h4>
+                    </div>
+                    <div class="flex bg-slate-800 p-1 rounded border border-slate-700 self-stretch sm:self-auto">
+                        <button id="btn-regime-dam" onclick="setRegime('dam')" class="flex-1 sm:flex-initial px-3 py-1 rounded bg-blue-600 text-white font-semibold transition">
+                            🧱 Barrage Géré
+                        </button>
+                        <button id="btn-regime-natural" onclick="setRegime('natural')" class="flex-1 sm:flex-initial px-3 py-1 rounded text-slate-300 hover:text-white font-medium transition">
+                            🏞️ Lac Naturel
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Simulation Info Banner -->
+                <p id="regime-desc" class="text-slate-400 mb-3 italic leading-relaxed">
+                    Gestion anthropique : Turbinage actif ($Q_{\text{penstock}}$), vannes de fond régulées ($Q_{\text{gate}}$) selon le niveau, et déversoir d'urgence actif à $h > 18\text{m}$.
+                </p>
+
+                <!-- Live Flows Grid -->
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+                    <div class="bg-slate-950 p-2.5 rounded border border-slate-800">
+                        <span id="lbl-flow-pen" class="block text-slate-500 font-semibold mb-1">Turbines ($Q_{\text{pen}}$)</span>
+                        <div class="flex items-baseline justify-between">
+                            <span id="flow-val-pen" class="font-mono text-base font-bold text-blue-400">12.0 m³/s</span>
+                        </div>
+                        <div class="w-full bg-slate-800 h-1.5 rounded-full mt-1.5 overflow-hidden">
+                            <div id="flow-bar-pen" class="bg-blue-400 h-full transition-all duration-300" style="width: 50%"></div>
+                        </div>
+                    </div>
+
+                    <div class="bg-slate-950 p-2.5 rounded border border-slate-800">
+                        <span id="lbl-flow-gate" class="block text-slate-500 font-semibold mb-1">Vannes ($Q_{\text{gate}}$)</span>
+                        <div class="flex items-baseline justify-between">
+                            <span id="flow-val-gate" class="font-mono text-base font-bold text-cyan-400">14.3 m³/s</span>
+                            <span id="flow-status-gate" class="text-[9px] text-emerald-400 font-bold uppercase">(20%)</span>
+                        </div>
+                        <div class="w-full bg-slate-800 h-1.5 rounded-full mt-1.5 overflow-hidden">
+                            <div id="flow-bar-gate" class="bg-cyan-400 h-full transition-all duration-300" style="width: 20%"></div>
+                        </div>
+                    </div>
+
+                    <div class="bg-slate-950 p-2.5 rounded border border-slate-800">
+                        <span class="block text-slate-500 font-semibold mb-1" id="lbl-flow-spill">Déversoir ($Q_{\text{spill}}$)</span>
+                        <div class="flex items-baseline justify-between">
+                            <span id="flow-val-spill" class="font-mono text-base font-bold text-amber-500">0.0 m³/s</span>
+                        </div>
+                        <div class="w-full bg-slate-800 h-1.5 rounded-full mt-1.5 overflow-hidden">
+                            <div id="flow-bar-spill" class="bg-amber-500 h-full transition-all duration-300" style="width: 0%"></div>
+                        </div>
+                    </div>
+
+                    <div class="bg-slate-950 p-2.5 rounded border border-blue-900/40">
+                        <span id="lbl-flow-tot" class="block text-slate-400 font-bold mb-1">Débit Total ($Q_{\text{sortant}}$)</span>
+                        <div class="flex items-baseline justify-between">
+                            <span id="flow-val-total" class="font-mono text-base font-bold text-emerald-400">26.3 m³/s</span>
+                        </div>
+                        <div class="w-full bg-slate-800 h-1.5 rounded-full mt-1.5 overflow-hidden">
+                            <div id="flow-bar-total" class="bg-emerald-400 h-full transition-all duration-300" style="width: 45%"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Visualization layouts: side-by-side SVG model + HSV Curves -->
+            <div class="grid grid-cols-1 md:grid-cols-12 gap-4">
+                <!-- SVG Canvas (Col 1 to 7) -->
+                <div id="svg-container" class="md:col-span-8 relative border border-slate-200 rounded-lg overflow-hidden bg-slate-50 flex items-center justify-center p-2 min-h-[380px]">
+                    <!-- SVG Start -->
+                    <svg id="dam-scientific-svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 500" class="w-full h-auto max-h-[440px]">
+                        <defs>
+                            <!-- Grid pattern for background texture in grayscale -->
+                            <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+                                <path d="M 40 0 L 0 0 0 40" fill="none" stroke="rgba(148, 163, 184, 0.08)" stroke-width="1"/>
+                            </pattern>
+                            <!-- Water gradient (Color theme) -->
+                            <linearGradient id="water-grad" x1="0%" y1="0%" x2="0%" y2="100%">
+                                <stop offset="0%" stop-color="#38bdf8" stop-opacity="0.8"/>
+                                <stop offset="100%" stop-color="#0284c7" stop-opacity="0.95"/>
+                            </linearGradient>
+                            <linearGradient id="sky-grad" x1="0%" y1="0%" x2="0%" y2="100%">
+                                <stop offset="0%" stop-color="#f8fafc"/>
+                                <stop offset="100%" stop-color="#e2e8f0"/>
+                            </linearGradient>
+                        </defs>
+
+                        <!-- Background Grid -->
+                        <rect width="100%" height="100%" fill="url(#grid)" />
+                        
+                        <!-- Sky Line -->
+                        <rect x="0" y="0" width="800" height="150" fill="url(#sky-grad)" opacity="0.4" />
+                        
+                        <!-- Ground/Bedrock -->
+                        <path d="M 0,380 L 150,380 L 250,420 L 500,420 L 550,460 L 800,460 L 800,500 L 0,500 Z" fill="#cbd5e1" stroke="#94a3b8" stroke-width="2" />
+                        <path id="bedrock-hatch" d="M 0,380 L 150,380 L 250,420 L 500,420 L 550,460 L 800,460" fill="none" stroke="#64748b" stroke-width="3" />
+
+                        <!-- Reservoir Water Volume Body (Dynamic) -->
+                        <path id="water-body" d="M 0,220 L 480,220 L 480,420 L 250,420 L 150,380 L 0,380 Z" fill="url(#water-grad)" stroke="#0284c7" stroke-width="1.5" />
+                        <line id="water-surface-line" x1="0" y1="220" x2="480" y2="220" stroke="#0369a1" stroke-width="2.5" stroke-dasharray="2,0" />
+
+                        <!-- Dynamic lines for Fortran operating rules zones -->
+                        <!-- yFillTarget Line (Orange dotted) -->
+                        <g id="line-group-filltarget" class="opacity-70">
+                            <line id="svg-line-filltarget" x1="200" y1="260" x2="520" y2="260" stroke="#f97316" stroke-width="1.5" stroke-dasharray="4,4" />
+                            <text id="svg-txt-filltarget" x="360" y="255" class="text-[9px] fill-orange-600 font-mono" text-anchor="middle">yFillTarget</text>
+                        </g>
+
+                        <!-- yOptLevel Line (Green dotted) -->
+                        <g id="line-group-optlevel" class="opacity-70">
+                            <line id="svg-line-optlevel" x1="200" y1="200" x2="520" y2="200" stroke="#10b981" stroke-width="1.5" stroke-dasharray="4,4" />
+                            <text id="svg-txt-optlevel" x="360" y="195" class="text-[9px] fill-emerald-600 font-mono" text-anchor="middle">yOptLevel</text>
+                        </g>
+
+                        <!-- Clouds & Precipitation / Evaporation (Atmospheric flux) -->
+                        <!-- Precipitation -->
+                        <g id="group-precip" class="cursor-pointer opacity-90 transition-all duration-300 hover:scale-[1.02]" onclick="selectComponent('precipitation')">
+                            <path d="M 80,60 Q 95,45 115,50 Q 135,40 150,55 Q 165,55 165,70 Q 155,85 135,85 L 95,85 Q 75,85 80,60 Z" fill="#e2e8f0" stroke="#cbd5e1" stroke-width="1.5" />
+                            <!-- Rain strokes -->
+                            <g stroke="#38bdf8" stroke-width="1.5" stroke-linecap="round">
+                                <line x1="95" y1="95" x2="90" y2="115" />
+                                <line x1="115" y1="95" x2="110" y2="115" />
+                                <line x1="135" y1="95" x2="130" y2="115" />
+                                <line x1="155" y1="95" x2="150" y2="115" />
+                            </g>
+                            <text x="125" y="30" class="text-xs font-bold font-sans fill-slate-700" text-anchor="middle" id="txt-label-p">P (Précipitations)</text>
+                        </g>
+
+                        <!-- Evaporation -->
+                        <g id="group-evap" class="cursor-pointer opacity-90 transition-all duration-300 hover:scale-[1.02]" onclick="selectComponent('evaporation')">
+                            <!-- Wavy arrows going up -->
+                            <path d="M 280,195 Q 285,185 280,175 T 280,155" fill="none" stroke="#f43f5e" stroke-width="2" marker-end="url(#arrow-evap)" stroke-linecap="round" />
+                            <path d="M 320,195 Q 325,185 320,175 T 320,155" fill="none" stroke="#f43f5e" stroke-width="2" marker-end="url(#arrow-evap)" stroke-linecap="round" />
+                            <path d="M 360,195 Q 365,185 360,175 T 360,155" fill="none" stroke="#f43f5e" stroke-width="2" marker-end="url(#arrow-evap)" stroke-linecap="round" />
+                            <text x="320" y="140" class="text-xs font-bold fill-rose-600 font-sans" text-anchor="middle" id="txt-label-e">E (Évaporation)</text>
+                        </g>
+
+                        <!-- Inflow Fluxes (Qentrant & Qlateral) -->
+                        <!-- Qentrant (Left arrow) -->
+                        <g id="group-qin" class="cursor-pointer transition-all duration-300 hover:translate-x-1" onclick="selectComponent('qinflow')">
+                            <path d="M 10,290 L 90,290" fill="none" stroke="#0284c7" stroke-width="4" marker-end="url(#arrow-blue)" />
+                            <text x="45" y="275" class="text-xs font-bold fill-blue-700 font-sans" text-anchor="middle" id="txt-label-qin">Qentrant</text>
+                        </g>
+                        <!-- Qlateral -->
+                        <g id="group-qlat" class="cursor-pointer transition-all duration-300 hover:translate-x-1" onclick="selectComponent('qlateral')">
+                            <path d="M 120,330 Q 150,330 170,350" fill="none" stroke="#0284c7" stroke-width="3" stroke-dasharray="4,2" marker-end="url(#arrow-blue-small)" />
+                            <text x="110" y="315" class="text-xs font-bold fill-blue-700 font-sans" text-anchor="middle" id="txt-label-qlat">Qlatéral</text>
+                        </g>
+
+                        <!-- Dam Structure -->
+                        <g id="dam-wall">
+                            <path d="M 480,180 L 540,180 L 590,420 L 480,420 Z" fill="#64748b" stroke="#475569" stroke-width="2" />
+                            <line x1="440" y1="180" x2="550" y2="180" stroke="#94a3b8" stroke-width="1" stroke-dasharray="3,3" />
+                            <text id="txt-label-crest-h" x="565" y="173" class="text-[10px] fill-slate-500 font-sans font-medium" >Cote déversoir (h_crest)</text>
+                        </g>
+
+                        <!-- Outflow Paths -->
+                        <!-- 1. Spillway -->
+                        <g id="group-qspill" class="cursor-pointer" onclick="selectComponent('spillway')">
+                            <path id="spillway-water" d="M 470,180 Q 520,180 545,210 Q 560,250 580,360 Q 590,440 640,440 L 640,455 L 565,455 Z" fill="#0284c7" opacity="0" />
+                            <path id="spillway-arrow" d="M 470,175 Q 520,172 550,220" fill="none" stroke="#f59e0b" stroke-width="3" marker-end="url(#arrow-orange)" opacity="0" />
+                            <text x="560" y="155" class="text-xs font-bold fill-amber-600 font-sans" text-anchor="middle" id="txt-label-qspill">Qdéversoir (Spillway)</text>
+                        </g>
+
+                        <!-- 2. Sluice Gates -->
+                        <g id="group-qgate" class="cursor-pointer" onclick="selectComponent('gates')">
+                            <rect id="gate-structure" x="500" y="320" width="40" height="20" fill="#334155" />
+                            <path id="gate-flow" d="M 490,330 L 590,330 Q 640,340 670,440" fill="none" stroke="#0ea5e9" stroke-width="3" marker-end="url(#arrow-blue-small)" />
+                            <line id="gate-valve-line" x1="520" y1="310" x2="520" y2="350" stroke="#ef4444" stroke-width="3" />
+                            <text x="520" y="300" class="text-[10px] fill-red-500 font-semibold font-sans text-anchor="middle" id="txt-label-gate-valve">Vanne</text>
+                            <text x="640" y="320" class="text-xs font-bold fill-cyan-700 font-sans" id="txt-label-qgate">Qvannes (Gates)</text>
+                        </g>
+
+                        <!-- 3. Penstocks -->
+                        <g id="group-qpenstock" class="cursor-pointer" onclick="selectComponent('penstock')">
+                            <path d="M 460,390 L 580,450 L 660,450" fill="none" stroke="#1e293b" stroke-width="8" />
+                            <path d="M 460,390 L 580,450 L 660,450" fill="none" stroke="#38bdf8" stroke-width="4" id="penstock-flow-core" />
+                            <rect x="660" y="420" width="50" height="40" fill="#475569" stroke="#334155" stroke-width="1.5" />
+                            <polygon points="660,420 685,400 710,420" fill="#334155" />
+                            <circle cx="685" cy="438" r="8" fill="#eab308" />
+                            <text x="685" y="441" class="text-[8px] font-bold fill-slate-900 font-sans" text-anchor="middle">G</text>
+                            <text x="705" y="410" class="text-xs font-bold fill-blue-800 font-sans" id="txt-label-qpen">Qturbinage (Penstock)</text>
+                        </g>
+
+                        <!-- Downstream River bed flow -->
+                        <path d="M 590,440 Q 650,440 800,450 L 800,480 L 585,480 Z" fill="#0284c7" opacity="0.6" />
+                        <path d="M 590,440 Q 650,440 800,450" fill="none" stroke="#0369a1" stroke-width="2" />
+                        <text x="740" y="435" class="text-[10px] font-bold fill-sky-950 font-sans" id="txt-label-qout-tot">Qsortant (Total)</text>
+
+                        <!-- Variables & Measurement Indicators -->
+                        <!-- Water Level Height Dimension h -->
+                        <g id="dimension-h" class="cursor-pointer" onclick="selectComponent('geometry')">
+                            <line x1="220" y1="420" x2="220" y2="220" stroke="#0f172a" stroke-width="1.5" marker-end="url(#arrow-dark)" marker-start="url(#arrow-dark)" id="line-dim-h" />
+                            <line x1="205" y1="220" x2="235" y2="220" stroke="#0f172a" stroke-width="1.2" id="tick-dim-h-top" />
+                            <line x1="205" y1="420" x2="235" y2="420" stroke="#0f172a" stroke-width="1.2" />
+                            <rect x="228" y="305" width="62" height="24" fill="#f8fafc" rx="4" stroke="#e2e8f0" class="transition-colors duration-200" id="rect-dim-h-bg" />
+                            <text x="259" y="321" class="text-xs font-bold font-serif fill-slate-900" text-anchor="middle">h(t)</text>
+                        </g>
+
+                        <!-- Surface Dimension A -->
+                        <g id="dimension-a" class="cursor-pointer" onclick="selectComponent('geometry')">
+                            <line id="line-dim-a" x1="0" y1="210" x2="480" y2="210" stroke="#0f172a" stroke-width="1" stroke-dasharray="3,3" />
+                            <rect x="180" y="185" width="90" height="20" fill="#f8fafc" rx="3" stroke="#cbd5e1" id="rect-dim-a-bg" />
+                            <text x="225" y="199" class="text-[10px] font-bold font-serif fill-slate-800" text-anchor="middle" id="txt-lbl-a">Surface A(t)</text>
+                        </g>
+
+                        <!-- Inside Reservoir Volume V -->
+                        <g id="label-volume-svg" class="cursor-pointer" onclick="selectComponent('massbalance')">
+                            <circle cx="340" cy="310" r="22" fill="#ffffff" fill-opacity="0.9" stroke="#0284c7" stroke-width="1.5" id="circ-volume-bg" />
+                            <text x="340" y="314" class="text-xs font-bold font-serif fill-blue-900" text-anchor="middle">V(t)</text>
+                        </g>
+
+                        <!-- Markers Definitions -->
+                        <defs>
+                            <marker id="arrow-blue" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                                <path d="M 0 1 L 10 5 L 0 9 z" fill="#0284c7" />
+                            </marker>
+                            <marker id="arrow-blue-small" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="4" markerHeight="4" orient="auto-start-reverse">
+                                <path d="M 0 1 L 10 5 L 0 9 z" fill="#0ea5e9" />
+                            </marker>
+                            <marker id="arrow-orange" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                                <path d="M 0 1 L 10 5 L 0 9 z" fill="#f59e0b" />
+                            </marker>
+                            <marker id="arrow-dark" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse">
+                                <path d="M 0 1 L 10 5 L 0 9 z" fill="#0f172a" />
+                            </marker>
+                            <marker id="arrow-evap" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse">
+                                <path d="M 0 9 L 5 0 L 10 9 z" fill="#f43f5e" />
+                            </marker>
+                        </defs>
+                    </svg>
+                    <!-- SVG End -->
+                </div>
+
+                <!-- NEW: Scientific HSV Curve Vector Chart (Col 8 to 12) -->
+                <div class="md:col-span-4 border border-slate-200 rounded-lg bg-slate-50 p-3 flex flex-col justify-between">
+                    <div>
+                        <h4 id="hsv-chart-title" class="font-bold text-slate-800 text-xs uppercase tracking-wider mb-2">Courbes Hypsométriques (H-S-V)</h4>
+                        <p id="hsv-chart-desc" class="text-[10px] text-slate-500 mb-3 leading-relaxed">
+                            Projections de la hauteur d'eau active $h(t)$ sur la Surface ($A$ en bleu) et le Volume ($V$ en violet).
+                        </p>
+                    </div>
+                    <!-- Chart Graphic container -->
+                    <div class="relative w-full h-[260px] bg-white border border-slate-100 rounded p-1">
+                        <svg id="hsv-curve-svg" viewBox="0 0 200 240" class="w-full h-full">
+                            <!-- Axis lines -->
+                            <line x1="30" y1="210" x2="190" y2="210" stroke="#475569" stroke-width="1.2" />
+                            <line x1="30" y1="10" x2="30" y2="210" stroke="#475569" stroke-width="1.2" />
+                            
+                            <!-- Grid Y-ticks (Height 0 to 24m) -->
+                            <line x1="25" y1="210" x2="30" y2="210" stroke="#475569" />
+                            <text x="20" y="213" class="text-[8px] fill-slate-500 font-mono" text-anchor="end">0m</text>
+                            <line x1="25" y1="110" x2="30" y2="110" stroke="#475569" stroke-dasharray="2,2" />
+                            <text x="20" y="113" class="text-[8px] fill-slate-500 font-mono" text-anchor="end">12m</text>
+                            <line x1="25" y1="10" x2="30" y2="10" stroke="#475569" />
+                            <text x="20" y="13" class="text-[8px] fill-slate-500 font-mono" text-anchor="end">24m</text>
+                            
+                            <!-- Legend / Curve Lines -->
+                            <!-- Curve A(h) = 5 * h^1.2. Scaled to width -->
+                            <path id="curve-a" d="" fill="none" stroke="#0ea5e9" stroke-width="2" />
+                            <!-- Curve V(h) = 2.27 * h^2.2. Scaled to width -->
+                            <path id="curve-v" d="" fill="none" stroke="#8b5cf6" stroke-width="2" />
+                            
+                            <!-- Active tracking indicators -->
+                            <!-- Horizontal pointer line at current height -->
+                            <line id="hsv-tracker-y" x1="30" y1="110" x2="190" y2="110" stroke="#f43f5e" stroke-width="1" stroke-dasharray="2,2" />
+                            
+                            <!-- Active projection dots -->
+                            <circle id="dot-a" cx="30" cy="110" r="4" fill="#0ea5e9" stroke="#fff" stroke-width="1" />
+                            <circle id="dot-v" cx="30" cy="110" r="4" fill="#8b5cf6" stroke="#fff" stroke-width="1" />
+                        </svg>
+                    </div>
+                    <!-- Tiny Legend -->
+                    <div class="flex justify-around items-center text-[9px] mt-2 font-semibold">
+                        <div class="flex items-center gap-1.5">
+                            <span class="inline-block w-2.5 h-1 bg-sky-500 rounded"></span>
+                            <span id="lbl-legend-area">Surface A(h)</span>
+                        </div>
+                        <div class="flex items-center gap-1.5">
+                            <span class="inline-block w-2.5 h-1 bg-purple-500 rounded"></span>
+                            <span id="lbl-legend-vol">Volume V(h)</span>
+                        </div>
+                        <div class="flex items-center gap-1.5">
+                            <span class="inline-block w-2 h-2 rounded-full bg-rose-500"></span>
+                            <span id="lbl-legend-h">h active</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="mt-4 p-3 bg-slate-50 rounded-lg text-xs text-slate-500 flex justify-between items-center border border-slate-100">
+            </div>
+        </section>
+
+        <!-- Right: Scientific Explanations & Equations Panel -->
+        <section class="lg:col-span-5 flex flex-col gap-4">
+            
+            <!-- Quick Navigation tabs -->
+            <div class="flex gap-1 bg-slate-100 p-1 rounded-lg text-xs font-semibold text-slate-600">
+                <button onclick="switchTab('eq')" id="tab-eq" class="flex-1 py-1.5 px-2 rounded-md bg-white text-slate-900 shadow-sm transition">Équations & Physique</button>
+                <button onclick="switchTab('gestion')" id="tab-gestion" class="flex-1 py-1.5 px-2 rounded-md hover:text-slate-900 transition">Règles de Gestion</button>
+                <button onclick="switchTab('config')" id="tab-config" class="flex-1 py-1.5 px-2 rounded-md hover:text-slate-900 transition">Paramètres</button>
+            </div>
+
+            <!-- TAB 1: EQUATIONS & PHYSICS -->
+            <div id="panel-eq" class="bg-white rounded-xl shadow-sm border border-slate-200 p-5 flex-1 flex flex-col justify-between">
+                <div>
+                    <!-- Active Component Highlight Header -->
+                    <div class="flex justify-between items-start mb-4">
+                        <div>
+                            <span class="text-[10px] font-bold tracking-wider text-blue-600 uppercase" id="comp-category">Physique du Réservoir</span>
+                            <h3 class="text-lg font-bold text-slate-800 mt-0.5" id="comp-title">Bilan Hydrique Global</h3>
+                        </div>
+                        <span id="comp-badge" class="px-2 py-1 text-xs font-semibold rounded bg-blue-50 text-blue-700 border border-blue-100">Système complet</span>
+                    </div>
+
+                    <!-- Description text -->
+                    <p id="comp-desc" class="text-sm text-slate-600 leading-relaxed mb-4">
+                        L'équation maîtresse régit la variation de volume d'eau stockée dans le réservoir au cours du temps par un bilan de masse macroscopique continu.
+                    </p>
+
+                    <!-- Math Renderer (KaTeX target) -->
+                    <div class="bg-slate-50 p-4 rounded-lg border border-slate-100 mb-5 overflow-x-auto">
+                        <div id="katex-eq-display" class="text-center py-2 text-lg">
+                            <!-- Populated dynamically -->
+                        </div>
+                    </div>
+
+                    <!-- Variables table -->
+                    <h4 id="variables-header" class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">Variables impliquées</h4>
+                    <div id="variables-list" class="space-y-2 text-xs">
+                        <!-- Populated dynamically -->
+                    </div>
+                </div>
+
+                <div class="border-t border-slate-100 pt-4 mt-6">
+                    <span id="quick-sel-label" class="text-[11px] text-slate-400 block mb-2 font-medium">Sélection rapide du processus :</span>
+                    <div class="flex flex-wrap gap-1.5">
+                        <button id="btn-sel-massbalance" onclick="selectComponent('massbalance')" class="px-2 py-1 rounded bg-slate-100 hover:bg-slate-200 text-[11px] font-medium transition text-slate-700">Bilan d'Eau</button>
+                        <button id="btn-sel-geometry" onclick="selectComponent('geometry')" class="px-2 py-1 rounded bg-slate-100 hover:bg-slate-200 text-[11px] font-medium transition text-slate-700">Géométrie H-S-V</button>
+                        <button id="btn-sel-precip" onclick="selectComponent('precipitation')" class="px-2 py-1 rounded bg-slate-100 hover:bg-slate-200 text-[11px] font-medium transition text-slate-700">Pluie (P)</button>
+                        <button id="btn-sel-evap" onclick="selectComponent('evaporation')" class="px-2 py-1 rounded bg-slate-100 hover:bg-slate-200 text-[11px] font-medium transition text-slate-700">Évaporation (E)</button>
+                        <button id="btn-sel-spill" onclick="selectComponent('spillway')" class="px-2 py-1 rounded bg-slate-100 hover:bg-slate-200 text-[11px] font-medium transition text-slate-700">Déversoir (Qspill)</button>
+                        <button id="btn-sel-gate" onclick="selectComponent('gates')" class="px-2 py-1 rounded bg-slate-100 hover:bg-slate-200 text-[11px] font-medium transition text-slate-700">Vannes (Qgate)</button>
+                        <button id="btn-sel-pen" onclick="selectComponent('penstock')" class="px-2 py-1 rounded bg-slate-100 hover:bg-slate-200 text-[11px] font-medium transition text-slate-700">Turbine (Qpen)</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB 2: RULES OF MANAGEMENT -->
+            <div id="panel-gestion" class="hidden bg-white rounded-xl shadow-sm border border-slate-200 p-5 flex-1 flex flex-col justify-between">
+                <div>
+                    <h3 class="text-lg font-bold text-slate-800 mb-3" id="title-management">Règles de Gestion & Stratégies opérationnelles</h3>
+                    <p id="desc-management" class="text-xs text-slate-500 mb-4 font-normal leading-relaxed">
+                        Dans un modèle hydrologique, les débits des vannes de fond et des conduites forcées dépendent de décisions humaines (règles de gestion), souvent basées sur des cibles de niveau ou de volume saisonniers (Courbes Guides).
+                    </p>
+
+                    <div class="space-y-4">
+                        <div class="p-3 bg-blue-50/50 rounded-lg border border-blue-100">
+                            <h4 id="rule1-title" class="text-xs font-bold text-blue-900 mb-1">1. Régulation à 3 Zones de Remplissage</h4>
+                            <p id="rule1-desc" class="text-xs text-slate-600 mb-2">Les vannes de fond s'ouvrent de façon incrémentale selon la hauteur d'eau active $Y$ pour éviter d'atteindre le déversement passif d'urgence :</p>
+                            <ul class="list-disc list-inside text-xs text-slate-600 space-y-1">
+                                <li><strong>$Y < y_{\text{FillTarget}}$ (Zone 1) :</strong> Consigne nominale mensuelle pure (`frac_cur`).</li>
+                                <li><strong>$y_{\text{FillTarget}} \le Y < y_{\text{OptLevel}}$ (Zone 2) :</strong> Consigne augmentée linéairement de `frac_cur` vers 100%.</li>
+                                <li><strong>$Y \ge y_{\text{OptLevel}}$ (Zone 3) :</strong> Sur-ouverture d'urgence forcée de `frac_cur` vers 100% jusqu'à `ySpillCrest`.</li>
+                            </ul>
+                        </div>
+
+                        <div class="p-3 bg-amber-50/50 rounded-lg border border-amber-100">
+                            <h4 id="rule2-title" class="text-xs font-bold text-amber-900 mb-1">2. Priorisation des lâchers & Écritures fichiers de log</h4>
+                            <ul class="list-disc list-inside text-xs text-slate-600 space-y-1">
+                                <li id="rule2-item1"><strong>Débit environnemental garanti :</strong> Protection de la faune aquatique en maintenant $Q \ge Q_{\text{env}}$ si $Y > y_{\text{minOpLevel}}$.</li>
+                                <li id="rule2-item2"><strong>Orifices submergés/non-submergés :</strong> Transition dynamique entre les équations d'orifice sous charge et d'écoulement libre ("Low head").</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                <div id="rule2-desc-bottom" class="mt-4 border-t border-slate-100 pt-3 text-xs text-slate-400">
+                    Ces consignes conditionnelles modifient les équations à chaque pas de temps $\Delta t$.
+                </div>
+            </div>
+
+            <!-- TAB 3: MODEL PARAMETERS (All requested sliders added) -->
+            <div id="panel-config" class="hidden bg-white rounded-xl shadow-sm border border-slate-200 p-5 flex-1 flex flex-col justify-between">
+                <div>
+                    <h3 id="title-config" class="text-lg font-bold text-slate-800 mb-1">Paramètres du Module</h3>
+                    <p id="desc-config" class="text-xs text-slate-500 mb-4">Ajustez l'ensemble des cotes limites et coefficients de décharge clés.</p>
+                    
+                    <div class="space-y-4 max-h-[380px] overflow-y-auto pr-2">
+                        
+                        <!-- SECTION A: COTES & SEUILS -->
+                        <h4 class="text-[10px] font-bold text-slate-400 uppercase tracking-wider border-b border-slate-100 pb-1">Limites Physiques & Consignes (m)</h4>
+                        
+                        <!-- ySpillCrest -->
+                        <div class="bg-slate-50 p-2.5 rounded border border-slate-200/60">
+                            <div class="flex justify-between items-center mb-1">
+                                <span class="font-bold text-xs text-slate-700" id="lbl-p-spill">Seuil du Déversoir ($y_{\text{SpillCrest}}$)</span>
+                                <span id="val-ySpillCrest" class="font-mono text-xs font-bold text-slate-950">18.0 m</span>
+                            </div>
+                            <input type="range" id="param-ySpillCrest" min="16" max="22" step="0.2" value="18" oninput="changeModelParam('ySpillCrest', this.value)" class="w-full h-1 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-blue-600">
+                        </div>
+
+                        <!-- yOptLevel -->
+                        <div class="bg-slate-50 p-2.5 rounded border border-slate-200/60">
+                            <div class="flex justify-between items-center mb-1">
+                                <span class="font-bold text-xs text-slate-700" id="lbl-p-opt">Cote optimale de gestion ($y_{\text{OptLevel}}$)</span>
+                                <span id="val-yOptLevel" class="font-mono text-xs font-bold text-slate-950">15.0 m</span>
+                            </div>
+                            <input type="range" id="param-yOptLevel" min="12" max="16" step="0.2" value="15" oninput="changeModelParam('yOptLevel', this.value)" class="w-full h-1 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-blue-600">
+                        </div>
+
+                        <!-- yFillTarget -->
+                        <div class="bg-slate-50 p-2.5 rounded border border-slate-200/60">
+                            <div class="flex justify-between items-center mb-1">
+                                <span class="font-bold text-xs text-slate-700" id="lbl-p-fill">Seuil d'écrêtement ($y_{\text{FillTarget}}$)</span>
+                                <span id="val-yFillTarget" class="font-mono text-xs font-bold text-slate-950">12.0 m</span>
+                            </div>
+                            <input type="range" id="param-yFillTarget" min="8" max="13" step="0.2" value="12" oninput="changeModelParam('yFillTarget', this.value)" class="w-full h-1 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-blue-600">
+                        </div>
+
+                        <!-- yGateSill (NEW) -->
+                        <div class="bg-slate-50 p-2.5 rounded border border-slate-200/60">
+                            <div class="flex justify-between items-center mb-1">
+                                <span class="font-bold text-xs text-slate-700" id="lbl-p-gate">Seuil des Vannes ($y_{\text{GateSill}}$)</span>
+                                <span id="val-yGateSill" class="font-mono text-xs font-bold text-slate-950">10.0 m</span>
+                            </div>
+                            <input type="range" id="param-yGateSill" min="6" max="11" step="0.2" value="10" oninput="changeModelParam('yGateSill', this.value)" class="w-full h-1 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-blue-600">
+                        </div>
+
+                        <!-- Qenv -->
+                        <div class="bg-slate-50 p-2.5 rounded border border-slate-200/60">
+                            <div class="flex justify-between items-center mb-1">
+                                <span class="font-bold text-xs text-slate-700" id="lbl-p-qenv">Débit écologique minimum ($Q_{\text{env}}$)</span>
+                                <span id="val-Qenv" class="font-mono text-xs font-bold text-slate-950">2.0 m³/s</span>
+                            </div>
+                            <input type="range" id="param-Qenv" min="0" max="10" step="0.5" value="2" oninput="changeModelParam('Qenv', this.value)" class="w-full h-1 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-blue-600">
+                        </div>
+
+                        <!-- SECTION B: COEFFICIENTS (NEW) -->
+                        <h4 class="text-[10px] font-bold text-slate-400 uppercase tracking-wider border-b border-slate-100 pb-1 pt-2">Coefficients Hydrauliques ($C_d$)</h4>
+
+                        <!-- Cd_pen (NEW) -->
+                        <div class="bg-slate-50 p-2.5 rounded border border-slate-200/60">
+                            <div class="flex justify-between items-center mb-1">
+                                <span class="font-bold text-xs text-slate-700" id="lbl-p-cdpen">Coeff. Conduite Turbines ($C_{d,\text{pen}}$)</span>
+                                <span id="val-Cd_pen" class="font-mono text-xs font-bold text-slate-950">0.60</span>
+                            </div>
+                            <input type="range" id="param-Cd_pen" min="0.3" max="0.9" step="0.05" value="0.6" oninput="changeModelParam('Cd_pen', this.value)" class="w-full h-1 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-blue-600">
+                        </div>
+
+                        <!-- Cd_gate (NEW) -->
+                        <div class="bg-slate-50 p-2.5 rounded border border-slate-200/60">
+                            <div class="flex justify-between items-center mb-1">
+                                <span class="font-bold text-xs text-slate-700" id="lbl-p-cdgate">Coeff. Vannes de fond ($C_{d,\text{gate}}$)</span>
+                                <span id="val-Cd_gate" class="font-mono text-xs font-bold text-slate-950">0.60</span>
+                            </div>
+                            <input type="range" id="param-Cd_gate" min="0.3" max="0.9" step="0.05" value="0.6" oninput="changeModelParam('Cd_gate', this.value)" class="w-full h-1 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-blue-600">
+                        </div>
+
+                        <!-- Cd_spill (NEW) -->
+                        <div class="bg-slate-50 p-2.5 rounded border border-slate-200/60">
+                            <div class="flex justify-between items-center mb-1">
+                                <span class="font-bold text-xs text-slate-700" id="lbl-p-cdspill">Coeff. Seuil Déversoir ($C_{d,\text{spill}}$)</span>
+                                <span id="val-Cd_spill" class="font-mono text-xs font-bold text-slate-950">1.80</span>
+                            </div>
+                            <input type="range" id="param-Cd_spill" min="1.0" max="2.2" step="0.05" value="1.8" oninput="changeModelParam('Cd_spill', this.value)" class="w-full h-1 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-blue-600">
+                        </div>
+
+                    </div>
+                </div>
+                <div id="footer-config-text" class="mt-4 border-t border-slate-100 pt-3 text-xs text-slate-400">
+                    *Modifications synchronisées avec le module Fortran 90 de flood_discharge.
+                </div>
+            </div>
+            
+        </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-slate-900 text-slate-400 text-xs text-center py-4 border-t border-slate-800 mt-auto">
+        <p id="footer-main-text">© 2026 Module de Modélisation Hydrologique Intégrée. Développé par Hydro Matters (www.hydro-matters.fr).</p>
+    </footer>
+
+    <!-- JS Logic -->
+    <script>
+        // Comprehensive Language Database for Translation (100% UI covered)
+        const langDb = {
+            fr: {
+                badgeCompType: "Composante Hydrologique",
+                title: "Module de Reservoir",
+                desc: "Intégration dans le modèle Hydrologique MGB-IPH pour la représentation des réservoir naturels et des barrages",
+                lblThemePrefix: "Mode :",
+                lblThemeColor: "Couleur",
+                lblThemeBw: "Noir & Blanc",
+                lblLangPrefix: "Langue :",
+                lblExportText: "Télécharger le SVG (.svg)",
+                canvasTitle: "Modèle conceptuel vectoriel (Interactif)",
+                canvasSubtitle: "Cliquez sur un composant pour voir son équation",
+                labelHeight: "Hauteur d'eau active ($h$) :",
+                labelSurface: "Surface ($A$)",
+                labelVolume: "Volume ($V$)",
+                scenarioBadge: "Scénario de Décharge",
+                regimeTitle: "Configuration de l'Exutoire",
+                btnRegimeDam: "🧱 Barrage Géré",
+                btnRegimeNatural: "🏞️ Lac Naturel",
+                lblFlowPen: "Turbines ($Q_{\\text{pen}}$)",
+                lblFlowGate: "Vannes ($Q_{\\text{gate}}$)",
+                lblFlowSpill: "Déversoir ($Q_{\\text{spill}}$)",
+                lblFlowSpillNat: "Émissaire Nat. ($Q_{\\text{spill}}$)",
+                lblFlowTot: "Débit Total ($Q_{\\text{sortant}}$)",
+                tabEq: "Équations & Physique",
+                tabGestion: "Règles de Gestion",
+                tabConfig: "Paramètres",
+                variablesHeader: "Variables impliquées",
+                quickSelLabel: "Sélection rapide du processus :",
+                btnSelMassbalance: "Bilan d'Eau",
+                btnSelGeometry: "Géométrie H-S-V",
+                btnSelPrecip: "Pluie (P)",
+                btnSelEvap: "Évaporation (E)",
+                btnSelSpill: "Déversoir (Qspill)",
+                btnSelGate: "Vannes (Qgate)",
+                btnSelPen: "Turbine (Qpen)",
+                titleManagement: "Règles de Gestion & Stratégies opérationnelles",
+                descManagement: "Dans un modèle hydrologique, les débits des vannes de fond et des conduites forcées dépendent de décisions humaines (règles de gestion), souvent basées sur des cibles de niveau ou de volume saisonniers (Courbes Guides).",
+                rule1Title: "1. Régulation à 3 Zones de Remplissage",
+                rule1Desc: "Les vannes de fond s'ouvrent de façon incrémentale selon la hauteur d'eau active $Y$ pour éviter d'atteindre le déversement passif d'urgence :",
+                rule2Title: "2. Priorisation des lâchers",
+                rule2Item1: "<strong>Débit environnemental garanti :</strong> Protection de la faune aquatique en maintenant $Q \\ge Q_{\\text{env}}$ si $Y > y_{\\text{minOpLevel}}$.",
+                rule2Item2: "<strong>Orifices submergés/non-submergés :</strong> Transition dynamique entre les équations d'orifice sous charge et d'écoulement libre (\"Low head\").",
+                rule2DescBottom: "Ces consignes conditionnelles modifient les équations à chaque pas de temps $\\Delta t$.",
+                titleConfig: "Paramètres du Module",
+                descConfig: "Ajustez l'ensemble des cotes limites et coefficients de décharge clés.",
+                lblPSpill: "Seuil du Déversoir ($y_{\\text{SpillCrest}}$)",
+                lblPOpt: "Cote optimale de gestion ($y_{\\text{OptLevel}}$)",
+                lblPFill: "Seuil d'écrêtement ($y_{\\text{FillTarget}}$)",
+                lblPGate: "Seuil des Vannes ($y_{\\text{GateSill}}$)",
+                lblPQenv: "Débit écologique minimum ($Q_{\\text{env}}$)",
+                lblPCdpen: "Coeff. Conduite Turbines ($C_{d,\\text{pen}}$)",
+                lblPCdgate: "Coeff. Vannes de fond ($C_{d,\\text{gate}}$)",
+                lblPCdspill: "Coeff. Seuil Déversoir ($C_{d,\\text{spill}}$)",
+                footerConfigText: "*Modifications synchronisées avec le module Fortran 90 de flood_discharge.",
+                footerMainText: "© 2026 Module de Modélisation Hydrologique Intégrée - Développé par Hydro Matters (www.hydro-matters.fr)",
+                
+                // SVG dynamic labels
+                qin: "Qentrant",
+                qlat: "Qlatéral",
+                qspill: "Qdéversoir (Spillway)",
+                qgate: "Qvannes (Gates)",
+                qpen: "Qturbinage (Penstock)",
+                qout_tot: "Qsortant (Total)",
+                crest_h: "Cote déversoir (h_crest)",
+                label_p: "P (Précipitations)",
+                label_e: "E (Évaporation)",
+                gate_valve: "Vanne",
+                dim_a: "Surface A(t)",
+                regime_dam_desc: "Gestion anthropique : Turbinage actif ($Q_{\\text{penstock}}$), vannes de fond régulées ($Q_{\\text{gate}}$) selon le niveau, et déversoir d'urgence passif à $h > 18\\text{ m}$.",
+                regime_nat_desc: "Comportement lac naturel : Pas d'organes de contrôle artificiels (Vannes/Turbines inactifs). Exutoire naturel par débordement de surface dès que $h > 12\\text{ m}$.",
+                hsv_title: "Courbes Hypsométriques (H-S-V)",
+                hsv_desc: "Projections de la hauteur d'eau active $h(t)$ sur la Surface ($A$ en bleu) et le Volume ($V$ en violet).",
+                lbl_legend_area: "Surface A(h)",
+                lbl_legend_vol: "Volume V(h)",
+                lbl_legend_h: "h active"
+            },
+            en: {
+                badgeCompType: "Hydrological Component",
+                title: "Reservoir Module",
+                desc: "Implemented into MGB-IPH hydrological model to represent natual reservoirs and dams.",
+                lblThemePrefix: "Theme:",
+                lblThemeColor: "Color",
+                lblThemeBw: "Black & White",
+                lblLangPrefix: "Language:",
+                lblExportText: "Download SVG (.svg)",
+                canvasTitle: "Vector Conceptual Model (Interactive)",
+                canvasSubtitle: "Click on a process component to view its equations",
+                labelHeight: "Active water height ($h$):",
+                labelSurface: "Surface Area ($A$)",
+                labelVolume: "Storage Volume ($V$)",
+                scenarioBadge: "Release Scenario",
+                regimeTitle: "Outlet Configuration",
+                btnRegimeDam: "🧱 Managed Dam",
+                btnRegimeNatural: "🏞️ Natural Lake",
+                lblFlowPen: "Turbines ($Q_{\\text{pen}}$)",
+                lblFlowGate: "Sluices ($Q_{\\text{gate}}$)",
+                lblFlowSpill: "Spillway ($Q_{\\text{spill}}$)",
+                lblFlowSpillNat: "Natural Outlet ($Q_{\\text{spill}}$)",
+                lblFlowTot: "Total Outflow ($Q_{\\text{out}}$)",
+                tabEq: "Equations & Physics",
+                tabGestion: "Operating Rules",
+                tabConfig: "Parameters",
+                variablesHeader: "Involved Variables",
+                quickSelLabel: "Quick process selection:",
+                btnSelMassbalance: "Water Budget",
+                btnSelGeometry: "H-S-V Geometry",
+                btnSelPrecip: "Rainfall (P)",
+                btnSelEvap: "Evaporation (E)",
+                btnSelSpill: "Spillway (Qspill)",
+                btnSelGate: "Sluices (Qgate)",
+                btnSelPen: "Turbine (Qpen)",
+                titleManagement: "Reservoir Operating Rules & Strategies",
+                descManagement: "In a hydrological model, the active flow rates of penstocks and gates depend on human decisions (operating rules), usually guided by seasonal storage level or volume objectives (Guide Curves).",
+                rule1Title: "1. 3-Zone Storage Regulation",
+                rule1Desc: "Sluice gates are opened incrementally according to the water stage $Y$ to prevent passive emergency overspill:",
+                rule2Title: "2. Outflow release prioritization",
+                rule2Item1: "<strong>Environmental minimum flow guarantee:</strong> Protection of aquatic life by maintaining $Q \\ge Q_{\\text{env}}$ if $Y > y_{\\text{minOpLevel}}$.",
+                rule2Item2: "<strong>Submerged/unsubmerged orifices:</strong> Dynamic transition between pressurized orifice equations and low head free flow (\"Low head\").",
+                rule2DescBottom: "These operational guidelines modify equations dynamically at each numerical time step $\\Delta t$.",
+                titleConfig: "Model Parameters",
+                descConfig: "Adjust key threshold levels and structural discharge coefficients.",
+                lblPSpill: "Spillway Crest ($y_{\\text{SpillCrest}}$)",
+                lblPOpt: "Optimal operating level ($y_{\\text{OptLevel}}$)",
+                lblPFill: "Fill target threshold ($y_{\\text{FillTarget}}$)",
+                lblPGate: "Sluice Gate Sill ($y_{\\text{GateSill}}$)",
+                lblPQenv: "Minimum environmental flow ($Q_{\\text{env}}$)",
+                lblPCdpen: "Penstock Discharge Coeff ($C_{d,\\text{pen}}$)",
+                lblPCdgate: "Sluice Gate Discharge Coeff ($C_{d,\\text{gate}}$)",
+                lblPCdspill: "Weir Discharge Coeff ($C_{d,\\text{spill}}$)",
+                footerConfigText: "*Modifications synchronized with the Fortran 90 flood_discharge algorithm.",
+                footerMainText: "© 2026 Integrated Hydrological Modeling System - Developed by Hydro Matters (www.hydro-matters.fr)",
+                
+                // SVG dynamic labels
+                qin: "Qinflow",
+                qlat: "Qlateral",
+                qspill: "Qspillway (Overspill)",
+                qgate: "Qgates (Sluice gates)",
+                qpen: "Qturbine (Penstock flow)",
+                qout_tot: "Qoutflow (Total)",
+                crest_h: "Crest Level (h_crest)",
+                label_p: "P (Precipitation)",
+                label_e: "E (Evaporation)",
+                gate_valve: "Sluice",
+                dim_a: "Surface Area A(t)",
+                regime_dam_desc: "Anthropogenic rules: Power generation active ($Q_{\\text{penstock}}$), sluice gates controlled ($Q_{\\text{gate}}$) by stage thresholds, and passive emergency weir overflow at $h > 18\\text{ m}$.",
+                regime_nat_desc: "Natural lake behavior: No active artificial structures. Free overflow discharging naturally through a rock sill when stage exceeds $h > 12\\text{ m}$.",
+                hsv_title: "Hypsometric Curves (H-S-V)",
+                hsv_desc: "Projections of active water level $h(t)$ on Surface Area ($A$, blue) and Storage Volume ($V$, purple).",
+                lbl_legend_area: "Surface Area A(h)",
+                lbl_legend_vol: "Storage Vol V(h)",
+                lbl_legend_h: "active h"
+            }
+        };
+
+        let currentLang = 'fr';
+        let currentTheme = 'color'; // 'color' or 'bw'
+        let activeRegime = 'dam';
+
+        // Fortran Simulation Config Parameters
+        let RES_ySpillCrest = 18.0;   // Seuil déversoir (ySpillCrest)
+        let RES_yOptLevel = 15.0;     // Niveau optimal cible (yOptLevel)
+        let RES_yFillTarget = 12.0;   // Niveau de déclenchement écrêtement (yFillTarget)
+        let RES_yGateSill = 10.0;     // Cote radier de la vanne de fond (Physiquement au-dessus de minOpLevel)
+        let RES_Qenv = 2.0;           // Débit écologique garanti (Qenv)
+        
+        let RES_minOpLevel = 5.0;     // Niveau min d'opération turbine
+        
+        // Dynamic/Static Coefficients modified from Fortran Parameters
+        let RES_Cd_pen = 0.60;
+        let RES_Cd_gate = 0.60;
+        let RES_Cd_spill = 1.80;
+
+        // Structural parameters
+        let RES_nPenstock = 1;
+        let RES_dPenstock = 1.2;      // Diamètre conduite forcée (m)
+        let RES_nGates = 2;
+        let RES_gateWidth = 3.0;      // Largeur vanne (m)
+        let RES_maxGateOpen = 2.5;    // Ouverture maximale (m)
+        let RES_spillLen = 15.0;      // Longueur déversoir (m)
+
+        // Monthly operating rules scheduled gate opening
+        const RES_gate_open_monthly = [0.10, 0.10, 0.15, 0.20, 0.40, 0.80, 0.85, 0.60, 0.30, 0.15, 0.10, 0.10];
+        let IMES = 5;  // default May
+
+        // Physics Components details
+        const componentsData = {
+            massbalance: {
+                cat_fr: "Bilan de masse",
+                cat_en: "Mass Balance",
+                title_fr: "Bilan Continu (flood_continuity.f90)",
+                title_en: "Continuous Budget (flood_continuity.f90)",
+                desc_fr: "L'équation maîtresse calcule le volume à chaque pas de temps $\\Delta t$. Vos apports regroupent les tributaires amont, le ruissellement de versant ($Q_{\\text{lat}}$), les précipitations, et les pertes par évaporation.",
+                desc_en: "The master equation calculates reservoir volume over time step $\\Delta t$. Core inputs combine river inflows, hillslope runoff ($Q_{\\text{lat}}$), open surface rainfall, and evaporation losses.",
+                eq: "V^{t+\\Delta t} = V^t + \\Delta t \\cdot \\left[Q_{\\text{entrant}} + Q_{\\text{latéral}} + \\frac{(P - E_0) \\cdot A}{1000 \\cdot \\text{DTP}} - Q_{\\text{sortant}}\\right]",
+                vars_fr: [
+                    { name: "V", desc: "Volume d'eau stocké dans le réservoir ($m^3$)" },
+                    { name: "Q_{entrant}", desc: "Débit de la rivière principale d'entrée ($m^3/s$)" },
+                    { name: "Q_{latéral}", desc: "Somme des débits latéraux des versants ($m^3/s$)" },
+                    { name: "P", desc: "Précipitations moyennes spatiales ($0.1\\,mm/pas$)" },
+                    { name: "E_0", desc: "Évaporation d'eau libre moyenne Penman ($0.1\\,mm/pas$)" },
+                    { name: "Q_{sortant}", desc: "Débit total à l'aval ($Q_{\\text{penstock}} + Q_{\\text{gate}} + Q_{\\text{spillway}}$)" }
+                ],
+                vars_en: [
+                    { name: "V", desc: "Reservoir storage water volume ($m^3$)" },
+                    { name: "Q_{entrant}", desc: "Primary upstream river inflow ($m^3/s$)" },
+                    { name: "Q_{latéral}", desc: "Lateral hillslope runoff ($m^3/s$)" },
+                    { name: "P", desc: "Mean direct precipitation on surface area ($0.1\\,mm/step$)" },
+                    { name: "E_0", desc: "Mean open water Penman evaporation ($0.1\\,mm/step$)" },
+                    { name: "Q_{sortant}", desc: "Total outflow released downstream ($Q_{\\text{penstock}} + Q_{\\text{gate}} + Q_{\\text{spillway}}$)" }
+                ]
+            },
+            geometry: {
+                cat_fr: "Géométrie Hydraulique",
+                cat_en: "Reservoir Geometry",
+                title_fr: "Interpolation Hypsométrique (COTA_AREA_VOL_RESERVOIR.FLP)",
+                title_en: "Hypsometric Interpolation (COTA_AREA_VOL_RESERVOIR.FLP)",
+                desc_fr: "À chaque pas de temps, après mise à jour du volume par le bilan, la hauteur d'eau $Y$ et la surface libre $A$ correspondantes sont calculées via la table hypsométrique à 5 colonnes en utilisant une recherche dichotomique rapide (`interp_res_bisect`).",
+                desc_en: "At each time step, after updating storage volume, the water elevation $Y$ and surface area $A$ are updated using dynamic binary search interpolation (`interp_res_bisect`) over the hypsometric table.",
+                eq: "Y(t) = \\text{dichotomie}\\left(V(t), \\textbf{Z}_{tab}, \\textbf{V}_{tab}\\right) \\quad \\text{et} \\quad A(t) = \\text{dichotomie}\\left(V(t), \\textbf{A}_{tab}, \\textbf{V}_{tab}\\right)",
+                vars_fr: [
+                    { name: "Y(t)", desc: "Cote / Hauteur d'eau interpolée par dichotomie ($m$)" },
+                    { name: "A(t)", desc: "Surface libre correspondante ($km^2$)" },
+                    { name: "V(t)", desc: "Volume calculé par bilan hydrique ($m^3$)" }
+                ],
+                vars_en: [
+                    { name: "Y(t)", desc: "Water elevation interpolated by binary search ($m$)" },
+                    { name: "A(t)", desc: "Corresponding reservoir surface area ($km^2$)" },
+                    { name: "V(t)", desc: "Storage volume from continuity budget ($m^3$)" }
+                ]
+            },
+            precipitation: {
+                cat_fr: "Entrant Atmosphérique",
+                cat_en: "Atmospheric Inflow",
+                title_fr: "Pluie Directe (P)",
+                title_en: "Direct Precipitation (P)",
+                desc_fr: "Les précipitations directes sur la surface libre du réservoir sont calculées en moyennant les valeurs des minis inondés repérés dans `Reservoir_flag.txt`.",
+                desc_en: "Direct precipitation volume on open water is calculated by averaging rainfall over active flooded grid cells from `Reservoir_flag.txt`.",
+                eq: "Q_{\\text{prec}} = \\frac{\\sum_{i} P_i}{N} \\cdot A(t) \\cdot \\frac{10^6}{\\text{DTP} \\cdot 10000}",
+                vars_fr: [
+                    { name: "Q_{prec}", desc: "Débit volumique d'apport pluvial ($m^3/s$)" },
+                    { name: "P_i", desc: "Précipitations de la cellule inondée $i$ ($0.1\\,mm/DTP$)" },
+                    { name: "A(t)", desc: "Surface libre instantanée du lac ($km^2$)" }
+                ],
+                vars_en: [
+                    { name: "Q_{prec}", desc: "Volumetric precipitation inflow rate ($m^3/s$)" },
+                    { name: "P_i", desc: "Rainfall depth on grid cell $i$ ($0.1\\,mm/DTP$)" },
+                    { name: "A(t)", desc: "Current surface area of the lake ($km^2$)" }
+                ]
+            },
+            evaporation: {
+                cat_fr: "Perte Atmosphérique",
+                cat_en: "Atmospheric Losses",
+                title_fr: "Évaporation d'Eau Libre (E)",
+                title_en: "Open Water Evaporation (E)",
+                desc_fr: "L'évaporation s'applique à la surface libre instantanée $A(t)$. Le taux d'évaporation de surface $E_0$ correspond à la moyenne spatiale calculée sur les minis inondés.",
+                desc_en: "Evaporative losses scale dynamically with current surface area $A(t)$. Average evaporation rate $E_0$ is computed as the spatial average over active flooded cells.",
+                eq: "Q_{\\text{evap}} = \\frac{\\sum_{i} E_{0,i}}{N} \\cdot A(t) \\cdot \\frac{10^6}{\\text{DTP} \\cdot 10000}",
+                vars_fr: [
+                    { name: "Q_{evap}", desc: "Pertes par évaporation d'eau libre ($m^3/s$)" },
+                    { name: "E_{0,i}", desc: "Évaporation potentielle Penman calculée ($0.1\\,mm/DTP$)" }
+                ],
+                vars_en: [
+                    { name: "Q_{evap}", desc: "Volumetric evaporation loss rate ($m^3/s$)" },
+                    { name: "E_{0,i}", desc: "Penman potential evaporation depth on cell $i$ ($0.1\\,mm/DTP$)" }
+                ]
+            },
+            spillway: {
+                cat_fr: "Sortie d'urgence",
+                cat_en: "Emergency Outflow",
+                title_fr: "Évacuateur de Crue Passif (Déversoir)",
+                title_en: "Passive Spillway Crest Weir",
+                desc_fr: "Le déversoir de crue évacue l'eau de manière passive dès que le niveau du lac dépasse la hauteur physique de la crête `ySpillCrest` selon l'équation classique de déversoir à seuil libre.",
+                desc_en: "The emergency spillway releases water passively as soon as water level exceeds physical crest level `ySpillCrest` according to standard broad-crested weir equations.",
+                eq: "Q_{\\text{spill}} = C_{d,\\text{spill}} \\cdot L_{\\text{spill}} \\cdot (Y - y_{\\text{SpillCrest}})^{1.5} \\quad \\text{si } Y > y_{\\text{SpillCrest}}",
+                vars_fr: [
+                    { name: "Q_{spill}", desc: "Débit déversé par-dessus la crête ($m^3/s$)" },
+                    { name: "L_{spill}", desc: "Longueur utile de déversement de la crête ($m$)" },
+                    { name: "y_{SpillCrest}", desc: "Hauteur de crête du barrage déversoir ($m$)" }
+                ],
+                vars_en: [
+                    { name: "Q_{spill}", desc: "Free weir spillway overflow discharge ($m^3/s$)" },
+                    { name: "L_{spill}", desc: "Effective crest spillway width ($m$)" },
+                    { name: "y_{SpillCrest}", desc: "Weir crest physical height ($m$)" }
+                ]
+            },
+            gates: {
+                cat_fr: "Sortie contrôlée",
+                cat_en: "Controlled Outflow",
+                title_fr: "Vannes de fond à charge variable",
+                title_en: "Sluice Gates variable head",
+                desc_fr: "Les vannes de fond sont soumises à trois régimes hydrauliques : complètement immergées, partiellement immergées ou faible charge (\"Low head\"). L'ouverture est modulée par les zones guides saisonnières.",
+                desc_en: "Sluice gates operate under three head regimes (submerged, partially submerged, or low head). The physical opening is modulated dynamically by seasonal filling guide zones.",
+                eq: "Q_{\\text{gate}} = C_{d}' \\cdot (N_{\\text{gates}} \\cdot W_{\\text{gate}} \\cdot G_{height}) \\cdot \\sqrt{2g(H_{\\text{gate}} - G_{height})} \\quad \\text{si submergée}",
+                vars_fr: [
+                    { name: "G_{height}", desc: "Hauteur d'ouverture réelle (modulée par les Zones 1, 2, 3) ($m$)" },
+                    { name: "C_{d}'", desc: "Coefficient ajusté dynamiquement selon la submersion de la vanne" },
+                    { name: "H_{\\text{gate}}", desc: "Charge d'eau active au-dessus de la vanne ($Y - y_{\\text{GateSill}}$)" }
+                ],
+                vars_en: [
+                    { name: "G_{height}", desc: "Effective gate opening height (modulated by Zones 1, 2, 3) ($m$)" },
+                    { name: "C_{d}'", desc: "Discharge coefficient adjusted dynamically according to gate submergence" },
+                    { name: "H_{\\text{gate}}", desc: "Water head above gate sill level ($Y - y_{\\text{GateSill}}$)" }
+                ]
+            },
+            penstock: {
+                cat_fr: "Sortie de production",
+                cat_en: "Production Outflow",
+                title_fr: "Conduite forcée (penstock.f90)",
+                title_en: "Hydropower Penstock flow",
+                desc_fr: "Le turbinage s'effectue via une conduite sous pression. Le débit est dicté par la charge hydraulique par rapport au niveau de sécurité de fonctionnement `minOpLevel` et capé par la charge disponible sous la cote des vannes.",
+                desc_en: "Power plant penstocks operate under pressure. Outflow is driven by local grid demand but physically bounded by active water head above penstock intake.",
+                eq: "Q_{\\text{pen}} = N_{\\text{pen}} \\cdot C_{d,\\text{pen}} \\cdot A_{\\text{pen}} \\cdot \\sqrt{2g(Y - y_{\\text{minOp}})} \\le Q_{\\text{pen,max}}",
+                vars_fr: [
+                    { name: "Q_{pen}", desc: "Débit turbiné acheminé vers la centrale ($m^3/s$)" },
+                    { name: "Q_{pen,max}", desc: "Capacité maximale de débit calculée sous la charge de sécurité du radier ($m^3/s$)" }
+                ],
+                vars_en: [
+                    { name: "Q_{pen}", desc: "Volumetric penstock turbine discharge ($m^3/s$)" },
+                    { name: "Q_{pen,max}", desc: "Maximum design discharge calculated at gate sill safety elevation ($m^3/s$)" }
+                ]
+            },
+            qinflow: {
+                cat_fr: "Entrant principal",
+                cat_en: "Main Inflow",
+                title_fr: "Débit Entrant topologique (Qin)",
+                title_en: "Topological Inflow Hydrograph",
+                desc_fr: "C'est le débit apporté par la rivière principale à l'entrée du réservoir, accumulé à partir des cellules amont identifiées par la liste `mini_Qin` de `Reservoir_flag.txt`.",
+                desc_en: "This is the primary inflow routed from upstream channels draining into the reservoir basin from `Reservoir_flag.txt`.",
+                eq: "Q_{\\text{entrant}}(t) = \\sum Q_{\\text{up}} \\quad \\text{sur les } \\textbf{mini}\\_\\textbf{Qin}",
+                vars_fr: [
+                    { name: "Q_{entrant}", desc: "Somme des débits hydrographiques amont entrants ($m^3/s$)" }
+                ],
+                vars_en: [
+                    { name: "Q_{entrant}", desc: "Sum of routed discharge upstream inflow cells ($m^3/s$)" }
+                ]
+            },
+            qlateral: {
+                cat_fr: "Entrant secondaire",
+                cat_en: "Secondary Inflow",
+                title_fr: "Apports Latéraux de versant",
+                title_en: "Lateral Catchment Inflow",
+                desc_fr: "Ces apports représentent le drainage direct des versants bordant le réservoir, les précipitations ruisselées non modélisées par le cours d'eau amont ou de petites sources tributaires.",
+                desc_en: "Represents lateral sheet flow and tributary contribution draining directly from adjacent hillslopes into the reservoir boundaries.",
+                eq: "Q_{\\text{latéral}}(t) = A_{\\text{local}} \\cdot R_{\\text{surf}}(t)",
+                vars_fr: [
+                    { name: "Q_{latéral}", desc: "Débit de ruissellement latéral direct ($m^3/s$)" },
+                    { name: "A_{local}", desc: "Superficie de bassin versant immédiat entourant le lac ($km^2$)" },
+                    { name: "R_{surf}", desc: "Lame d'eau ruisselée calculée par le modèle sur ces versants ($mm/s$)" }
+                ],
+                vars_en: [
+                    { name: "Q_{latéral}", desc: "Direct lateral catchment inflow rate ($m^3/s$)" },
+                    { name: "A_{local}", desc: "Local micro-catchment surface area enclosing the lake ($km^2$)" },
+                    { name: "R_{surf}", desc: "Runoff depth calculated on surrounding slopes ($mm/s$)" }
+                ]
+            }
+        };
+
+        // Active highlighted component keys
+        let activeComponent = 'massbalance';
+
+        // Initial setup on window load
+        window.addEventListener('load', () => {
+            drawHSVCurves();
+            updateWaterLevel(15.0);
+            selectComponent('massbalance');
+            renderMath();
+        });
+
+        // Draws the scientific SVG line graphs for H-S-V Curves
+        function drawHSVCurves() {
+            const curveA = document.getElementById('curve-a');
+            const curveV = document.getElementById('curve-v');
+            
+            let pathAData = "M";
+            let pathVData = "M";
+            
+            // Generate coordinates for h from 0 to 24m
+            for (let h = 0; h <= 24; h += 0.5) {
+                const area = 5.0 * Math.pow(h, 1.2); // ha
+                const volume = (5.0 / 2.2) * Math.pow(h, 2.2) / 10.0; // hm3
+                
+                // Scale values to fit graph viewport (x: 30 to 190, y: 210 to 10)
+                // Height h scales from 0 (y=210) to 24 (y=10)
+                const yPos = 210 - (h / 24) * 200;
+                
+                // Scale Area (max around 225 ha)
+                const xAreaPos = 30 + (area / 230) * 155;
+                // Scale Volume (max around 180 hm3)
+                const xVolPos = 30 + (volume / 20) * 155; // divided by max expected
+                
+                pathAData += ` ${xAreaPos.toFixed(1)},${yPos.toFixed(1)}`;
+                pathVData += ` ${xVolPos.toFixed(1)},${yPos.toFixed(1)}`;
+            }
+            
+            curveA.setAttribute('d', pathAData);
+            curveV.setAttribute('d', pathVData);
+        }
+
+        // Set operating regime (Dam with active gates vs Natural Lake with passive overflow)
+        function setRegime(regimeType) {
+            activeRegime = regimeType;
+            
+            const btnDam = document.getElementById('btn-regime-dam');
+            const btnNat = document.getElementById('btn-regime-natural');
+            const descText = document.getElementById('regime-desc');
+            const lblSpill = document.getElementById('lbl-flow-spill');
+            
+            if (regimeType === 'dam') {
+                btnDam.className = "flex-1 sm:flex-initial px-3 py-1 rounded bg-blue-600 text-white font-semibold transition";
+                btnNat.className = "flex-1 sm:flex-initial px-3 py-1 rounded text-slate-400 hover:text-white font-medium transition";
+                descText.textContent = langDb[currentLang].regime_dam_desc;
+                lblSpill.textContent = langDb[currentLang].lblFlowSpill;
+                
+                document.getElementById('group-qgate').style.opacity = "1";
+                document.getElementById('group-qpenstock').style.opacity = "1";
+                document.getElementById('line-group-filltarget').style.opacity = "0.7";
+                document.getElementById('line-group-optlevel').style.opacity = "0.7";
+                document.getElementById('txt-label-crest-h').textContent = langDb[currentLang].crest_h;
+            } else {
+                btnDam.className = "flex-1 sm:flex-initial px-3 py-1 rounded text-slate-400 hover:text-white font-medium transition";
+                btnNat.className = "flex-1 sm:flex-initial px-3 py-1 rounded bg-emerald-600 text-white font-semibold transition";
+                descText.textContent = langDb[currentLang].regime_nat_desc;
+                lblSpill.textContent = langDb[currentLang].lblFlowSpillNat;
+                
+                document.getElementById('group-qgate').style.opacity = "0.15";
+                document.getElementById('group-qpenstock').style.opacity = "0.15";
+                document.getElementById('line-group-filltarget').style.opacity = "0";
+                document.getElementById('line-group-optlevel').style.opacity = "0";
+                document.getElementById('txt-label-crest-h').textContent = currentLang === 'fr' ? "Seuil déversoir naturel (12.0m)" : "Natural Sill level (12.0m)";
+            }
+            
+            renderMath();
+            const currentHeight = document.getElementById('height-slider').value;
+            updateWaterLevel(currentHeight);
+        }
+
+        // Change a Model Parameter dynamically from the config inputs
+        function changeModelParam(paramKey, val) {
+            val = parseFloat(val);
+            if (paramKey === 'ySpillCrest') {
+                RES_ySpillCrest = val;
+                document.getElementById('val-ySpillCrest').innerText = val.toFixed(1) + ' m';
+            } else if (paramKey === 'yOptLevel') {
+                RES_yOptLevel = val;
+                document.getElementById('val-yOptLevel').innerText = val.toFixed(1) + ' m';
+            } else if (paramKey === 'yFillTarget') {
+                RES_yFillTarget = val;
+                document.getElementById('val-yFillTarget').innerText = val.toFixed(1) + ' m';
+            } else if (paramKey === 'yGateSill') {
+                RES_yGateSill = val;
+                document.getElementById('val-yGateSill').innerText = val.toFixed(1) + ' m';
+            } else if (paramKey === 'Qenv') {
+                RES_Qenv = val;
+                document.getElementById('val-Qenv').innerText = val.toFixed(1) + ' m³/s';
+            } else if (paramKey === 'Cd_pen') {
+                RES_Cd_pen = val;
+                document.getElementById('val-Cd_pen').innerText = val.toFixed(2);
+            } else if (paramKey === 'Cd_gate') {
+                RES_Cd_gate = val;
+                document.getElementById('val-Cd_gate').innerText = val.toFixed(2);
+            } else if (paramKey === 'Cd_spill') {
+                RES_Cd_spill = val;
+                document.getElementById('val-Cd_spill').innerText = val.toFixed(2);
+            }
+
+            // Sync visual lines inside SVG
+            updateSVGLines();
+
+            // Force recalculation of flows with current water height
+            const currentHeight = document.getElementById('height-slider').value;
+            updateWaterLevel(currentHeight);
+        }
+
+        // Updates calendar parameters (No day needed)
+        function updateCalendar() {
+            IMES = parseInt(document.getElementById('sim-month').value);
+            
+            // Update monthly guide fraction schedule indicator
+            let scheduledFrac = RES_gate_open_monthly[IMES - 1] * 100;
+            document.getElementById('val-sched-open').innerText = scheduledFrac.toFixed(1) + ' %';
+
+            // Recalculate everything
+            const currentHeight = document.getElementById('height-slider').value;
+            updateWaterLevel(currentHeight);
+        }
+
+        // Dynamically updates SVG guideline markers based on Fortran parameters
+        function updateSVGLines() {
+            const groundY = 420;
+            const maxH = 24; 
+            const highestY = 140;
+
+            const calcY = (h) => groundY - ((h / maxH) * (groundY - highestY));
+
+            const yFillY = calcY(RES_yFillTarget);
+            const yOptY = calcY(RES_yOptLevel);
+
+            // Update FillTarget line
+            const lineFill = document.getElementById('svg-line-filltarget');
+            const txtFill = document.getElementById('svg-txt-filltarget');
+            if (lineFill && txtFill) {
+                lineFill.setAttribute('y1', yFillY);
+                lineFill.setAttribute('y2', yFillY);
+                txtFill.setAttribute('y', yFillY - 5);
+                txtFill.textContent = currentLang === 'fr' ? `Seuil d'écrêtement (yFillTarget = ${RES_yFillTarget.toFixed(1)}m)` : `Fill Target threshold (yFillTarget = ${RES_yFillTarget.toFixed(1)}m)`;
+            }
+
+            // Update OptLevel line
+            const lineOpt = document.getElementById('svg-line-optlevel');
+            const txtOpt = document.getElementById('svg-txt-optlevel');
+            if (lineOpt && txtOpt) {
+                lineOpt.setAttribute('y1', yOptY);
+                lineOpt.setAttribute('y2', yOptY);
+                txtOpt.setAttribute('y', yOptY - 5);
+                txtOpt.textContent = currentLang === 'fr' ? `Niveau optimal (yOptLevel = ${RES_yOptLevel.toFixed(1)}m)` : `Optimal Level target (yOptLevel = ${RES_yOptLevel.toFixed(1)}m)`;
+            }
+        }
+
+        // Update the visual SVG water level and recalculate dynamic values using F90 physics
+        function updateWaterLevel(hVal) {
+            hVal = parseFloat(hVal);
+            document.getElementById('slider-val').innerText = hVal.toFixed(1) + ' m';
+            
+            // Core geometry model calculation (COTA_AREA_VOL_RESERVOIR interpolation simulation)
+            // Area A = 5 * h^1.2
+            const area = 5.0 * Math.pow(hVal, 1.2);
+            document.getElementById('calc-area').innerText = area.toFixed(1) + ' ha';
+            // Volume V = (5 / 2.2) * h^2.2
+            const volume = (5.0 / 2.2) * Math.pow(hVal, 2.2) / 10.0; // hm3
+            document.getElementById('calc-volume').innerText = volume.toFixed(2) + ' hm³';
+
+            // SVG interactive update
+            const waterBody = document.getElementById('water-body');
+            const waterLine = document.getElementById('water-surface-line');
+            const dimHLine = document.getElementById('line-dim-h');
+            const dimHTickTop = document.getElementById('tick-dim-h-top');
+            const dimA = document.getElementById('line-dim-a');
+            
+            const groundY = 420;
+            const maxH = 24; 
+            
+            // Y pixel coordinate of water surface
+            const waterY = groundY - ((hVal / maxH) * (groundY - 140)); // 140 is highest graphic limit
+            
+            // Redraw water body path
+            let pathD = `M 0,${Math.min(380, waterY)} L 480,${waterY} L 480,420 L 250,420 L 150,380 L 0,380 Z`;
+            if (waterY > 380) {
+                pathD = `M 0,${waterY} L 480,${waterY} L 480,420 L 250,420 L 150,380 L 110,380 Z`;
+            }
+            waterBody.setAttribute('d', pathD);
+            
+            // Redraw water surface line
+            waterLine.setAttribute('x1', '0');
+            waterLine.setAttribute('y1', waterY);
+            waterLine.setAttribute('x2', '480');
+            waterLine.setAttribute('y2', waterY);
+
+            // Update surface area measurement line
+            dimA.setAttribute('y1', waterY - 10);
+            dimA.setAttribute('x2', '480');
+            dimA.setAttribute('y2', waterY - 10);
+            document.getElementById('rect-dim-a-bg').setAttribute('y', waterY - 20);
+            document.getElementById('txt-lbl-a').setAttribute('y', waterY - 7);
+
+            // Redraw height dimension bracket lines
+            dimHLine.setAttribute('y2', waterY);
+            dimHTickTop.setAttribute('y1', waterY);
+            dimHTickTop.setAttribute('y2', waterY);
+            document.getElementById('rect-dim-h-bg').setAttribute('y', (waterY + 420)/2 - 12);
+            document.getElementById('rect-dim-h-bg').nextElementSibling.setAttribute('y', (waterY + 420)/2 + 4);
+
+            // Sync guidelines
+            updateSVGLines();
+
+            // Dynamic projection Y tracker on HSV chart
+            const chartY = 210 - (hVal / 24) * 200;
+            document.getElementById('hsv-tracker-y').setAttribute('y1', chartY);
+            document.getElementById('hsv-tracker-y').setAttribute('y2', chartY);
+            
+            // Project exact coordinates for projection dots
+            const xDotA = 30 + (area / 230) * 155;
+            const xDotV = 30 + (volume / 20) * 155;
+            document.getElementById('dot-a').setAttribute('cx', xDotA);
+            document.getElementById('dot-a').setAttribute('cy', chartY);
+            document.getElementById('dot-v').setAttribute('cx', xDotV);
+            document.getElementById('dot-v').setAttribute('cy', chartY);
+
+            // Calculate dynamic Flows (Q) using FORTRAN 90 equations from flood_discharge.f90
+            let qPen = 0;
+            let qGate = 0;
+            let qSpill = 0;
+            let gateStatusText = "(0%)";
+            let frac_interp = 0;
+            const g = 9.81;
+
+            if (activeRegime === 'dam') {
+                // 1. FORTRAN Penstock Flow calculation (Now correctly works with yGateSill > minOpLevel!)
+                if (hVal > RES_minOpLevel) {
+                    let H_pen = hVal - RES_minOpLevel;
+                    let A_pen = (Math.PI / 4.0) * Math.pow(RES_dPenstock, 2);
+                    
+                    // Formula: N_pen * Cd_pen * A_pen * sqrt(2g * H_pen)
+                    qPen = RES_nPenstock * RES_Cd_pen * A_pen * Math.sqrt(2.0 * g * H_pen);
+                    
+                    // Cap at design maximum head (Fortran uses GateSill as maximum design head reference)
+                    let headDiff = RES_yGateSill - RES_minOpLevel;
+                    if (headDiff > 0) {
+                        let Qpenstock_max = RES_nPenstock * RES_Cd_pen * A_pen * Math.sqrt(2.0 * g * headDiff);
+                        if (qPen > Qpenstock_max) qPen = Qpenstock_max;
+                    }
+                }
+
+                // 2. FORTRAN Sluice Gates Flow calculation
+                if (hVal > RES_yGateSill) {
+                    let H_gate = hVal - RES_yGateSill;
+
+                    // Daily calendar interpolation simulation (Assuming mid-month = 15)
+                    const days_per_month = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+                    let imes_next = (IMES % 12) + 1;
+                    let frac_cur = RES_gate_open_monthly[IMES - 1];
+                    let frac_nxt = RES_gate_open_monthly[imes_next - 1];
+                    frac_interp = frac_cur + (frac_nxt - frac_cur) * 14 / days_per_month[IMES - 1]; // day 15
+
+                    // FORTRAN ZONE 2 — Fill-protection progressive override
+                    if (hVal >= RES_yFillTarget && hVal < RES_yOptLevel) {
+                        if (RES_yOptLevel > RES_yFillTarget) {
+                            let frac_fill = (hVal - RES_yFillTarget) / (RES_yOptLevel - RES_yFillTarget);
+                            frac_interp = Math.max(frac_interp, Math.min(1.0, frac_fill));
+                        }
+                    }
+
+                    // FORTRAN ZONE 3 — Emergency override (Between yOptLevel and ySpillCrest)
+                    if (hVal >= RES_yOptLevel) {
+                        if (RES_ySpillCrest > RES_yOptLevel) {
+                            let frac_emergency = (hVal - RES_yOptLevel) / (RES_ySpillCrest - RES_yOptLevel);
+                            frac_interp = Math.max(frac_interp, Math.min(1.0, frac_emergency));
+                        } else {
+                            frac_interp = 1.0;
+                        }
+                    }
+
+                    let Gate_Opening_Height = frac_interp * RES_maxGateOpen;
+                    gateStatusText = "(" + Math.round(frac_interp * 100) + "%)";
+
+                    if (Gate_Opening_Height > 0.0) {
+                        // Fully submerged, partially submerged or low head orifice hydraulics
+                        if (H_gate - Gate_Opening_Height > 0.0) {
+                            // Fully submerged
+                            qGate = RES_Cd_gate * (RES_nGates * RES_gateWidth * Gate_Opening_Height) * Math.sqrt(2.0 * g * (H_gate - Gate_Opening_Height));
+                        } else if (H_gate - Gate_Opening_Height/2.0 > 0.0) {
+                            // Partially submerged
+                            let DisCoef_1 = RES_Cd_gate + 0.1 * (H_gate - 0.5 * Gate_Opening_Height/2.0) / (0.5 * Gate_Opening_Height);
+                            qGate = DisCoef_1 * (RES_nGates * RES_gateWidth * Gate_Opening_Height) * Math.sqrt(2.0 * g * (H_gate - Gate_Opening_Height/2.0));
+                        } else {
+                            // Low head free flow
+                            let DisCoef_1 = RES_Cd_gate * Math.pow(H_gate / Gate_Opening_Height, 0.25);
+                            qGate = DisCoef_1 * (RES_nGates * RES_gateWidth * H_gate) * Math.sqrt(2.0 * g * H_gate);
+                        }
+                    }
+                }
+
+                // 3. FORTRAN Spillway Flow (Broad crested weir)
+                if (hVal > RES_ySpillCrest) {
+                    let H_spill = hVal - RES_ySpillCrest;
+                    qSpill = RES_Cd_spill * RES_spillLen * Math.pow(H_spill, 1.5);
+                }
+            } else {
+                // Natural Lake Behavior (No penstock, passive free spillway above 12.0 m)
+                qPen = 0;
+                qGate = 0;
+                gateStatusText = "N/A";
+                
+                const natSill = 12.0;
+                if (hVal > natSill) {
+                    qSpill = 1.4 * 12.0 * Math.pow(hVal - natSill, 1.5);
+                }
+            }
+
+            // Combine Outflow & Environmental Minimum Flow Guarantee from flood_discharge.f90
+            let qTotal = qPen + qGate + qSpill;
+            if (activeRegime === 'dam') {
+                if (hVal > RES_minOpLevel) {
+                    qTotal = Math.max(qTotal, RES_Qenv);
+                } else {
+                    qTotal = Math.min(qTotal, RES_Qenv);
+                }
+            }
+
+            // Update numerical values in DOM
+            document.getElementById('flow-val-pen').innerText = qPen.toFixed(1) + ' m³/s';
+            document.getElementById('flow-val-gate').innerText = qGate.toFixed(1) + ' m³/s';
+            document.getElementById('flow-status-gate').innerText = gateStatusText;
+            document.getElementById('flow-val-spill').innerText = qSpill.toFixed(1) + ' m³/s';
+            document.getElementById('flow-val-total').innerText = qTotal.toFixed(1) + ' m³/s';
+
+            // Update visual meters (Progress bars) scaled to maximum design flows
+            const maxDesignPen = 20.0;
+            const maxDesignGate = 60.0;
+            const maxDesignSpill = 80.0;
+            const maxDesignTotal = 150.0;
+
+            document.getElementById('flow-bar-pen').style.width = Math.min(100, (qPen / maxDesignPen) * 100) + '%';
+            document.getElementById('flow-bar-gate').style.width = Math.min(100, (qGate / maxDesignGate) * 100) + '%';
+            document.getElementById('flow-bar-spill').style.width = Math.min(100, (qSpill / maxDesignSpill) * 100) + '%';
+            document.getElementById('flow-bar-total').style.width = Math.min(100, (qTotal / maxDesignTotal) * 100) + '%';
+
+            // Sync SVG flow graphics with calculations
+            const spillwayWater = document.getElementById('spillway-water');
+            const spillwayArrow = document.getElementById('spillway-arrow');
+            const gateFlow = document.getElementById('gate-flow');
+            const penstockFlowCore = document.getElementById('penstock-flow-core');
+
+            // Handle Spillway overspill activation visually
+            const activeCrestLimit = activeRegime === 'dam' ? RES_ySpillCrest : 12.0;
+            if (hVal > activeCrestLimit) {
+                spillwayWater.setAttribute('opacity', '0.75');
+                spillwayArrow.setAttribute('opacity', '1');
+            } else {
+                spillwayWater.setAttribute('opacity', '0');
+                spillwayArrow.setAttribute('opacity', '0');
+            }
+
+            // Gates water jet animation
+            if (qGate > 0.5 && activeRegime === 'dam') {
+                gateFlow.setAttribute('stroke-width', Math.max(1.5, Math.min(6, qGate/4)));
+                gateFlow.setAttribute('opacity', '1');
+                
+                // Animate gate valve line to represent actual fractional opening
+                let gateY = 310 + (1 - frac_interp) * 20;
+                document.getElementById('gate-valve-line').setAttribute('y1', gateY);
+            } else {
+                gateFlow.setAttribute('opacity', '0');
+                document.getElementById('gate-valve-line').setAttribute('y1', '330');
+            }
+
+            // Penstock inner flow line animation
+            if (qPen > 0 && activeRegime === 'dam') {
+                penstockFlowCore.setAttribute('opacity', '1');
+            } else {
+                penstockFlowCore.setAttribute('opacity', '0');
+            }
+        }
+
+        // Render equations with KaTeX
+        function renderMath() {
+            if (typeof renderMathInElement === 'function') {
+                renderMathInElement(document.body, {
+                    delimiters: [
+                        {left: '$$', right: '$$', display: true},
+                        {left: '$', right: '$', display: false}
+                    ],
+                    throwOnError: false
+                });
+            }
+        }
+
+        // Swaps dynamic equation text when component is clicked
+        function selectComponent(compKey) {
+            activeComponent = compKey;
+            const comp = componentsData[compKey];
+            if (!comp) return;
+
+            // Set content based on language
+            const lang = currentLang;
+            document.getElementById('comp-category').innerText = comp[`cat_${lang}`];
+            document.getElementById('comp-title').innerText = comp[`title_${lang}`];
+            document.getElementById('comp-desc').innerHTML = comp[`desc_${lang}`];
+            document.getElementById('comp-badge').innerText = compKey.toUpperCase();
+
+            // Set Formula
+            const formulaDisplay = document.getElementById('katex-eq-display');
+            formulaDisplay.innerHTML = `$$ ${comp.eq} $$`;
+
+            // Clear & set variables list
+            const varList = document.getElementById('variables-list');
+            varList.innerHTML = '';
+            
+            const vars = comp[`vars_${lang}`];
+            vars.forEach(v => {
+                const varRow = document.createElement('div');
+                varRow.className = "flex gap-4 border-b border-slate-50 py-1.5 items-start";
+                varRow.innerHTML = `
+                    <span class="font-mono font-bold text-blue-600 min-w-[80px]">$${v.name}$</span>
+                    <span class="text-slate-600">${v.desc}</span>
+                `;
+                varList.appendChild(varRow);
+            });
+
+            // Render math inside dynamic updates
+            renderMath();
+            highlightSVGElement(compKey);
+        }
+
+        // Highlight visual elements inside SVG based on selection
+        function highlightSVGElement(compKey) {
+            resetSVGHighlights();
+
+            if (compKey === 'precipitation') {
+                document.getElementById('group-precip').setAttribute('stroke', '#0284c7');
+                document.getElementById('group-precip').setAttribute('stroke-width', '1.5');
+            } else if (compKey === 'evaporation') {
+                document.getElementById('group-evap').querySelectorAll('path').forEach(p => p.setAttribute('stroke-width', '3'));
+            } else if (compKey === 'spillway') {
+                document.getElementById('group-qspill').setAttribute('font-weight', 'bold');
+            } else if (compKey === 'geometry') {
+                document.getElementById('rect-dim-h-bg').setAttribute('stroke', '#3b82f6');
+                document.getElementById('rect-dim-a-bg').setAttribute('stroke', '#3b82f6');
+            } else if (compKey === 'massbalance') {
+                document.getElementById('circ-volume-bg').setAttribute('stroke-width', '3');
+                document.getElementById('circ-volume-bg').setAttribute('stroke', '#3b82f6');
+            }
+        }
+
+        function resetSVGHighlights() {
+            document.getElementById('group-precip').removeAttribute('stroke');
+            document.getElementById('group-evap').querySelectorAll('path').forEach(p => p.setAttribute('stroke-width', '2'));
+            document.getElementById('rect-dim-h-bg').setAttribute('stroke', '#e2e8f0');
+            document.getElementById('rect-dim-a-bg').setAttribute('stroke', '#cbd5e1');
+            document.getElementById('circ-volume-bg').setAttribute('stroke-width', '1.5');
+            document.getElementById('circ-volume-bg').setAttribute('stroke', '#0284c7');
+        }
+
+        // Switch panel tabs
+        function switchTab(tabId) {
+            document.getElementById('panel-eq').classList.add('hidden');
+            document.getElementById('panel-gestion').classList.add('hidden');
+            document.getElementById('panel-config').classList.add('hidden');
+
+            document.getElementById('tab-eq').className = "flex-1 py-1.5 px-2 rounded-md hover:text-slate-900 transition";
+            document.getElementById('tab-gestion').className = "flex-1 py-1.5 px-2 rounded-md hover:text-slate-900 transition";
+            document.getElementById('tab-config').className = "flex-1 py-1.5 px-2 rounded-md hover:text-slate-900 transition";
+
+            document.getElementById(`panel-${tabId}`).classList.remove('hidden');
+            document.getElementById(`tab-${tabId}`).className = "flex-1 py-1.5 px-2 rounded-md bg-white text-slate-900 shadow-sm transition font-bold";
+        }
+
+        // Toggles between French and English labels (100% of the UI covered)
+        function toggleLanguage() {
+            currentLang = currentLang === 'fr' ? 'en' : 'fr';
+            document.getElementById('lang-text').innerText = currentLang === 'fr' ? 'Français' : 'English';
+            
+            const langObj = langDb[currentLang];
+            
+            // 1. Header and Controls
+            document.getElementById('badge-comp-type').innerText = langObj.badgeCompType;
+            document.getElementById('header-title').innerText = langObj.title;
+            document.getElementById('header-desc').innerText = langObj.desc;
+            document.getElementById('lbl-theme-prefix').innerText = langObj.lblThemePrefix;
+            document.getElementById('lbl-export-text').innerText = langObj.lblExportText;
+            document.getElementById('theme-text').innerText = currentTheme === 'color' ? langObj.lblThemeColor : langObj.lblThemeBw;
+
+            // 2. Active Canvas Controls
+            document.getElementById('canvas-title').innerText = langObj.canvasTitle;
+            document.getElementById('canvas-subtitle').innerText = langObj.canvasSubtitle;
+            document.getElementById('label-height').innerHTML = `<span>${langObj.labelHeight}</span><span id="slider-val" class="text-blue-600 font-bold">${document.getElementById('slider-val').innerText}</span>`;
+            document.getElementById('label-surface').innerHTML = langObj.labelSurface;
+            document.getElementById('label-volume').innerHTML = langObj.labelVolume;
+            document.getElementById('scenario-badge').innerText = langObj.scenarioBadge;
+            document.getElementById('regime-title').innerText = langObj.regimeTitle;
+            document.getElementById('btn-regime-dam').innerText = langObj.btnRegimeDam;
+            document.getElementById('btn-regime-natural').innerText = langObj.btnRegimeNatural;
+            
+            // 3. Outflow simulator meters
+            document.getElementById('lbl-flow-pen').innerHTML = langObj.lblFlowPen;
+            document.getElementById('lbl-flow-gate').innerHTML = langObj.lblFlowGate;
+            document.getElementById('lbl-flow-spill').innerHTML = activeRegime === 'dam' ? langObj.lblFlowSpill : langObj.lblFlowSpillNat;
+            document.getElementById('lbl-flow-tot').innerHTML = langObj.lblFlowTot;
+            document.getElementById('publish-tip').innerHTML = langObj.publishTip;
+
+            // Calendar sub-labels
+            document.getElementById('lbl-sim-month').innerText = currentLang === 'fr' ? "Mois de simul. (IMES) :" : "Simulated Month (IMES):";
+            document.getElementById('lbl-sched-open').innerText = currentLang === 'fr' ? "Consigne mensuelle (frac_cur)" : "Scheduled Opening (frac_cur)";
+
+            // Adjust Select month options names
+            const monthSelect = document.getElementById('sim-month');
+            const frMonths = ["Janvier", "Février", "Mars", "Avril", "Mai", "Juin", "Juillet", "Août", "Septembre", "Octobre", "Novembre", "Décembre"];
+            const enMonths = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+            for (let i = 0; i < 12; i++) {
+                monthSelect.options[i].text = currentLang === 'fr' ? `${frMonths[i]} (${i+1})` : `${enMonths[i]} (${i+1})`;
+            }
+
+            // 4. Navigation tabs
+            document.getElementById('tab-eq').innerText = langObj.tabEq;
+            document.getElementById('tab-gestion').innerText = langObj.tabGestion;
+            document.getElementById('tab-config').innerText = langObj.tabConfig;
+
+            // 5. Tab 1 Process selection button labels
+            document.getElementById('variables-header').innerText = langObj.variablesHeader;
+            document.getElementById('quick-sel-label').innerText = langObj.quickSelLabel;
+            document.getElementById('btn-sel-massbalance').innerText = langObj.btnSelMassbalance;
+            document.getElementById('btn-sel-geometry').innerText = langObj.btnSelGeometry;
+            document.getElementById('btn-sel-precip').innerText = langObj.btnSelPrecip;
+            document.getElementById('btn-sel-evap').innerText = langObj.btnSelEvap;
+            document.getElementById('btn-sel-spill').innerText = langObj.btnSelSpill;
+            document.getElementById('btn-sel-gate').innerText = langObj.btnSelGate;
+            document.getElementById('btn-sel-pen').innerText = langObj.btnSelPen;
+
+            // 6. Tab 2 Panel (Operating rules)
+            document.getElementById('title-management').innerText = langObj.titleManagement;
+            document.getElementById('desc-management').innerHTML = langObj.descManagement;
+            document.getElementById('rule1-title').innerHTML = langObj.rule1Title;
+            document.getElementById('rule1-desc').innerHTML = langObj.rule1Desc;
+            document.getElementById('rule2-title').innerHTML = langObj.rule2Title;
+            document.getElementById('rule2-item1').innerHTML = langObj.rule2Item1;
+            document.getElementById('rule2-item2').innerHTML = langObj.rule2Item2;
+            document.getElementById('rule2-desc-bottom').innerHTML = langObj.rule2DescBottom;
+
+            // 7. Tab 3 Panel (Model Parameters - All updated)
+            document.getElementById('title-config').innerText = langObj.titleConfig;
+            document.getElementById('desc-config').innerText = langObj.descConfig;
+            
+            document.getElementById('lbl-p-spill').innerHTML = langObj.lblPSpill;
+            document.getElementById('lbl-p-opt').innerHTML = langObj.lblPOpt;
+            document.getElementById('lbl-p-fill').innerHTML = langObj.lblPFill;
+            document.getElementById('lbl-p-gate').innerHTML = langObj.lblPGate;
+            document.getElementById('lbl-p-qenv').innerHTML = langObj.lblPQenv;
+            document.getElementById('lbl-p-cdpen').innerHTML = langObj.lblPCdpen;
+            document.getElementById('lbl-p-cdgate').innerHTML = langObj.lblPCdgate;
+            document.getElementById('lbl-p-cdspill').innerHTML = langObj.lblPCdspill;
+            
+            document.getElementById('footer-config-text').innerText = langObj.footerConfigText;
+
+            // 8. Main Footer text
+            document.getElementById('footer-main-text').innerText = langObj.footerMainText;
+
+            // 9. SVG vector illustration text nodes
+            document.getElementById('txt-label-qin').textContent = langObj.qin;
+            document.getElementById('txt-label-qlat').textContent = langObj.qlat;
+            document.getElementById('txt-label-qspill').textContent = langObj.qspill;
+            document.getElementById('txt-label-qgate').textContent = langObj.qgate;
+            document.getElementById('txt-label-qpen').textContent = langObj.qpen;
+            document.getElementById('txt-label-qout-tot').textContent = langObj.qout_tot;
+            document.getElementById('txt-label-crest-h').textContent = langObj.crest_h;
+            document.getElementById('txt-label-p').textContent = langObj.label_p;
+            document.getElementById('txt-label-e').textContent = langObj.label_e;
+            document.getElementById('txt-label-gate-valve').textContent = langObj.gate_valve;
+            document.getElementById('txt-lbl-a').textContent = langObj.dim_a;
+
+            // Chart Labels translation
+            document.getElementById('hsv-chart-title').innerText = langObj.hsv_title;
+            document.getElementById('hsv-chart-desc').innerHTML = langObj.hsv_desc;
+            document.getElementById('lbl-legend-area').innerText = langObj.lbl_legend_area;
+            document.getElementById('lbl-legend-vol').innerText = langObj.lbl_legend_vol;
+            document.getElementById('lbl-legend-h').innerText = langObj.lbl_legend_h;
+
+            document.getElementById('regime-desc').textContent = activeRegime === 'dam' ? langObj.regime_dam_desc : langObj.regime_nat_desc;
+
+            selectComponent(activeComponent);
+            const currentHeight = document.getElementById('height-slider').value;
+            updateWaterLevel(currentHeight);
+        }
+
+        // Toggles between Colorful web style and Black & White publication ready style
+        function toggleTheme() {
+            currentTheme = currentTheme === 'color' ? 'bw' : 'color';
+            
+            const langObj = langDb[currentLang];
+            document.getElementById('theme-text').innerText = currentTheme === 'color' ? langObj.lblThemeColor : langObj.lblThemeBw;
+            
+            const svg = document.getElementById('dam-scientific-svg');
+            const waterBody = document.getElementById('water-body');
+            const spillwayWater = document.getElementById('spillway-water');
+            const gateFlow = document.getElementById('gate-flow');
+            const penstockFlowCore = document.getElementById('penstock-flow-core');
+
+            const curveSvg = document.getElementById('hsv-curve-svg');
+            const curveA = document.getElementById('curve-a');
+            const curveV = document.getElementById('curve-v');
+
+            if (currentTheme === 'bw') {
+                svg.style.backgroundColor = "#ffffff";
+                waterBody.setAttribute('fill', '#e2e8f0');
+                waterBody.setAttribute('stroke', '#000000');
+                waterBody.setAttribute('stroke-dasharray', 'none');
+                
+                spillwayWater.setAttribute('fill', '#94a3b8');
+                gateFlow.setAttribute('stroke', '#475569');
+                penstockFlowCore.setAttribute('stroke', '#475569');
+                
+                // Curve adjustments
+                curveSvg.style.backgroundColor = "#ffffff";
+                curveA.setAttribute('stroke', '#000000');
+                curveA.setAttribute('stroke-dasharray', '4,2');
+                curveV.setAttribute('stroke', '#475569');
+
+                document.querySelectorAll('#dam-scientific-svg text').forEach(t => {
+                    t.setAttribute('fill', '#000000');
+                    t.classList.add('serif-font');
+                });
+            } else {
+                svg.style.backgroundColor = "transparent";
+                waterBody.setAttribute('fill', 'url(#water-grad)');
+                waterBody.setAttribute('stroke', '#0284c7');
+                
+                spillwayWater.setAttribute('fill', '#0284c7');
+                gateFlow.setAttribute('stroke', '#0ea5e9');
+                penstockFlowCore.setAttribute('stroke', '#38bdf8');
+                
+                // Curve adjustments
+                curveA.setAttribute('stroke', '#0ea5e9');
+                curveA.removeAttribute('stroke-dasharray');
+                curveV.setAttribute('stroke', '#8b5cf6');
+
+                document.querySelectorAll('#dam-scientific-svg text').forEach(t => {
+                    t.classList.remove('serif-font');
+                });
+                
+                currentLang = currentLang === 'fr' ? 'en' : 'fr'; 
+                toggleLanguage();
+            }
+        }
+
+        // Direct SVG Vector exporter
+        function exportSVG() {
+            const svgElement = document.getElementById('dam-scientific-svg');
+            const serializer = new XMLSerializer();
+            let source = serializer.serializeToString(svgElement);
+
+            if(!source.match(/^<svg[^>]+xmlns="http\:\/\/www\.w3\.org\/2000\/svg"/)){
+                source = source.replace(/^<svg/, '<svg xmlns="http://www.w3.org/2000/svg"');
+            }
+            if(!source.match(/^<svg[^>]+xmlns\:xlink="http\:\/\/www\.w3\.org\/1999\/xlink"/)){
+                source = source.replace(/^<svg/, '<svg xmlns:xlink="http://www.w3.org/1999/xlink"');
+            }
+
+            const url = "data:image/svg+xml;charset=utf-8," + encodeURIComponent(source);
+            const downloadLink = document.createElement("a");
+            downloadLink.href = url;
+            downloadLink.download = `schema_barrage_hydrologie_${currentTheme}_${currentLang}.svg`;
+            document.body.appendChild(downloadLink);
+            downloadLink.click();
+            document.body.removeChild(downloadLink);
+        }
+    </script>
+</body>
+</html>
